@@ -1,0 +1,635 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Swiss Everesting Atlas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter+Tight:wght@700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: alpine-postcard hero scene, then a "your day" control panel (profile + SBB-style board), Wegweiser award signs, and a two-column chart grid on topo-contour paper. */
+:root{
+  --sky1:#9FD3F0; --sky2:#E6F5FC; --sun:#FFCF3F; --stars:0; --cloud:1;
+  --mtn-back:#AFC6D6; --mtn-mid:#86A3B6; --snow:#FFFFFF; --meadow1:#9BCF6E; --meadow2:#6AB04C; --fir:#2F6B3A; --wood:#9A5B34; --roof:#5B2E1C;
+  --bg:#F5FAF6; --surface:#FFFFFF; --ink:#1B2A33; --muted:#5C6C73; --line:#DCE7E2; --grid:#EAF0ED; --contour:rgba(120,96,60,.07); --shadow:rgba(27,42,51,.07);
+  --red:#DA291C; --sign:#FFCC00; --sign-ink:#111111; --board:#0F2C55; --board-ink:#FFFFFF; --board-muted:#9DB3D6;
+  --good:#2E7D4F; --warn:#C77700; --crit:#C8281E; --s1:#3C6FA8; --s2:#B07F00; --s3:#C8281E;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --poster:"Inter Tight",Inter,"Helvetica Neue",Arial,sans-serif;
+  --body:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --sky1:#0B1630; --sky2:#22355C; --sun:#F3F0DC; --stars:1; --cloud:0;
+  --mtn-back:#34496E; --mtn-mid:#273A5A; --snow:#DCE6F2; --meadow1:#2A4E36; --meadow2:#1E3D2A; --fir:#12301E; --wood:#6E4A33; --roof:#3A1F15;
+  --bg:#0F1720; --surface:#16222E; --ink:#E6EDF1; --muted:#94A5AE; --line:#283746; --grid:#1E2C39; --contour:rgba(180,200,220,.05); --shadow:rgba(0,0,0,.3);
+  --board:#0A1E3D; --board-ink:#FFFFFF; --board-muted:#8EA6CC;
+  --good:#3A9E64; --warn:#C4861A; --crit:#E0483E; --s1:#5B8FD0; --s2:#CF9F2A; --s3:#E0483E; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --sky1:#0B1630; --sky2:#22355C; --sun:#F3F0DC; --stars:1; --cloud:0;
+  --mtn-back:#34496E; --mtn-mid:#273A5A; --snow:#DCE6F2; --meadow1:#2A4E36; --meadow2:#1E3D2A; --fir:#12301E; --wood:#6E4A33; --roof:#3A1F15;
+  --bg:#0F1720; --surface:#16222E; --ink:#E6EDF1; --muted:#94A5AE; --line:#283746; --grid:#1E2C39; --contour:rgba(180,200,220,.05); --shadow:rgba(0,0,0,.3);
+  --board:#0A1E3D; --board-ink:#FFFFFF; --board-muted:#8EA6CC;
+  --good:#3A9E64; --warn:#C4861A; --crit:#E0483E; --s1:#5B8FD0; --s2:#CF9F2A; --s3:#E0483E; color-scheme:dark}
+*{box-sizing:border-box}
+body{background-color:var(--bg);color:var(--ink);font:15px/1.55 var(--body);
+  background-image:repeating-radial-gradient(ellipse at 12% 38%,transparent 0 26px,var(--contour) 26px 27px),repeating-radial-gradient(ellipse at 88% 72%,transparent 0 30px,var(--contour) 30px 31px)}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.hero{position:relative;overflow:hidden;background:var(--sky2);margin-top:calc(-1 * env(safe-area-inset-top,0px));padding-top:calc(env(safe-area-inset-top,0px) + 2.4rem);padding-bottom:clamp(170px,22vw,250px)}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero .wrap{position:relative;z-index:1}
+.hero-text{max-width:38rem}
+.sign{display:inline-flex;align-items:center;gap:.6em;background:var(--sign);color:var(--sign-ink);font:600 .95rem/1 var(--display);letter-spacing:.06em;text-transform:uppercase;padding:.45em 1.7em .45em .8em;clip-path:polygon(0 0,calc(100% - .9em) 0,100% 50%,calc(100% - .9em) 100%,0 100%)}
+h1{font:800 clamp(2.3rem,5vw,3.7rem)/.95 var(--poster);letter-spacing:-.035em;margin:.8rem 0 .6rem;text-wrap:balance;color:var(--ink)}
+h1 .cross{display:inline-block;width:.62em;height:.62em;background:var(--red);border-radius:.08em;position:relative;vertical-align:.04em;margin-left:.12em}
+h1 .cross::before,h1 .cross::after{content:"";position:absolute;background:#fff;left:50%;top:50%;transform:translate(-50%,-50%)}
+h1 .cross::before{width:.12em;height:.4em}h1 .cross::after{width:.4em;height:.12em}
+.lede{color:var(--ink);opacity:.82;max-width:40ch;margin:0;font-size:1rem}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 24px var(--shadow);padding:1.1rem 1.15rem .95rem;min-width:0}
+.panel h2,.aw-h{font:800 1.15rem/1.2 var(--poster);letter-spacing:-.01em;margin:0 0 .3rem;text-wrap:balance}
+.panel h2::before,.aw-h::before{content:"";display:inline-block;width:24px;height:10px;margin-right:.55rem;vertical-align:.08em;background:linear-gradient(#fff 0 33%,var(--red) 33% 67%,#fff 67%);border:1px solid var(--line);border-radius:2px}
+.day{margin-top:-3.2rem;position:relative;z-index:2}
+.prof-head{display:flex;flex-wrap:wrap;gap:.4rem 1rem;align-items:baseline;justify-content:space-between;margin:.2rem 0 .3rem}
+.prof-name{font:700 1.5rem/1.1 var(--display);letter-spacing:.02em}
+.prof-sub{font:400 .8rem var(--mono);color:var(--muted)}
+#profile{width:100%;height:auto;display:block}
+.board{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));background:var(--board);color:var(--board-ink);border-radius:10px;overflow:hidden;margin-top:.6rem}
+.stat{padding:.65rem .85rem;border-left:1px solid rgba(255,255,255,.12)}
+.stat:first-child{border-left:0}
+.stat .k{font:500 .66rem var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--board-muted)}
+.stat .v{font:600 1.55rem/1.15 var(--mono);font-variant-numeric:tabular-nums;margin-top:.1rem;letter-spacing:-.02em}
+.stat .v small{font:400 .75rem var(--mono);color:var(--board-muted);margin-left:.2em}
+.controls{display:flex;flex-wrap:wrap;gap:1rem 2rem;align-items:end;padding-block:1rem .2rem}
+.ctl{display:grid;gap:.3rem;min-width:0}
+.ctl label{font:500 .72rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ctl output{font:500 .9rem var(--mono);color:var(--ink)}
+select,input[type=range]{accent-color:var(--red)}
+select{font:500 .95rem var(--body);padding:.45rem .6rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;max-width:100%}
+.presets{display:flex;gap:.4rem;flex-wrap:wrap}
+.presets button{font:500 .8rem var(--body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:.35rem .75rem;border-radius:999px;cursor:pointer}
+.presets button:hover{border-color:var(--ink)}
+.presets button[aria-pressed=true]{background:var(--red);color:#fff;border-color:var(--red)}
+:focus-visible{outline:2px solid var(--s1);outline-offset:2px}
+.awards-wrap{padding-top:.4rem}
+.aw-h span{font:400 .8rem var(--mono);color:var(--muted);margin-left:.4rem}
+.awards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.8rem 1rem;margin-top:.6rem}
+.award{position:relative;background:var(--sign);color:var(--sign-ink);border:0;padding:.6rem 2.1rem .65rem .9rem;text-align:left;cursor:pointer;font:inherit;display:grid;gap:.1rem;align-content:start;
+  clip-path:polygon(0 0,calc(100% - 1.4rem) 0,100% 50%,calc(100% - 1.4rem) 100%,0 100%);filter:drop-shadow(0 2px 0 rgba(0,0,0,.15))}
+.award:hover{background:#FFD633}
+.award .cat{font:600 .7rem/1.1 var(--display);letter-spacing:.1em;text-transform:uppercase}
+.award .who{font:700 1.2rem/1.1 var(--display);letter-spacing:.01em}
+.award .why{font:500 .74rem var(--mono)}
+.award[aria-pressed=true] .who::after{content:"";display:inline-block;width:.5em;height:.5em;border-radius:50%;background:var(--red);margin-left:.35em;vertical-align:.1em}
+.stack{display:flex;flex-direction:column;gap:1.25rem;padding-bottom:1rem}
+.grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:1.25rem}
+.grid>.panel{display:flex;flex-direction:column}
+.grid>.panel>svg{margin-bottom:auto}
+.grid>.panel{position:relative;overflow:hidden;isolation:isolate}
+.grid>.panel::after{content:"";position:absolute;inset:auto 0 0;height:90px;background:var(--mtn-back);opacity:.22;z-index:-1;pointer-events:none;
+  -webkit-mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 80' preserveAspectRatio='none'><path d='M0 80 L0 52 L60 30 L95 44 L150 12 L190 34 L240 22 L300 48 L350 18 L380 6 L420 30 L470 26 L520 44 L560 28 L600 40 L600 80Z'/></svg>") bottom/100% 100% no-repeat;mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 80' preserveAspectRatio='none'><path d='M0 80 L0 52 L60 30 L95 44 L150 12 L190 34 L240 22 L300 48 L350 18 L380 6 L420 30 L470 26 L520 44 L560 28 L600 40 L600 80Z'/></svg>") bottom/100% 100% no-repeat}
+.panel svg line[stroke="var(--grid)"]{stroke:var(--line);stroke-dasharray:1 4;stroke-linecap:round}
+
+.grid.b{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}
+.grid.even{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.legend{display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;font-size:.8rem;color:var(--muted);margin-bottom:.5rem}
+.legend span{display:inline-flex;align-items:center;gap:.4rem}
+svg text{font-family:var(--mono);font-size:10.5px;fill:var(--muted)}
+svg .lbl{font-family:var(--body);font-size:11px;fill:var(--ink);font-weight:500}
+details.howto{margin:0 0 .6rem}
+details.howto summary,details.method-d summary{cursor:pointer;font:500 .78rem var(--body);color:var(--muted);list-style:none;display:inline-flex;align-items:center;gap:.35rem}
+details.howto summary::before,details.method-d summary::before{content:"▸";font-size:.7rem;transition:transform .15s}
+details[open]>summary::before{transform:rotate(90deg)}
+details summary::-webkit-details-marker{display:none}
+details.howto .cap{margin:.4rem 0 0;color:var(--muted);font-size:.85rem;max-width:70ch}
+details.method-d{padding-block:.4rem 2rem}
+details.method-d summary{font:800 1.05rem var(--poster);color:var(--ink)}
+.method{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.25rem;padding-block:1rem 0}
+.method h3{font:700 1.1rem var(--display);letter-spacing:.03em;margin:0 0 .3rem}
+.method p,.method li{color:var(--muted);font-size:.86rem;margin:0 0 .4rem}
+.method ul{padding-left:1.1rem;margin:0}
+.chip{font:500 .7rem var(--mono);border:1px solid var(--line);padding:.05rem .35rem;border-radius:3px;white-space:nowrap}
+#tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font-size:.78rem;padding:.45rem .6rem;border-radius:8px;max-width:260px;z-index:20;line-height:1.4}
+#tip b{font-weight:600}
+@media (max-width:900px){.grid,.grid.b,.grid.even,.method{grid-template-columns:minmax(0,1fr)}.board{grid-template-columns:repeat(3,minmax(0,1fr))}.stat:nth-child(4){border-left:0}.stat:nth-child(n+4){border-top:1px solid rgba(255,255,255,.12)}}
+@media (max-width:480px){.board{grid-template-columns:repeat(2,minmax(0,1fr))}.stat:nth-child(odd){border-left:0}.stat:nth-child(n+3){border-top:1px solid rgba(255,255,255,.12)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="hero"><svg id="scene" viewBox="0 -140 1200 560" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg><div class="wrap">
+  <div class="hero-text">
+    <span class="sign">8 848 m · hike up, ride down</span>
+    <h1>Swiss Everesting Atlas<span class="cross" aria-hidden="true"></span></h1>
+    <p class="lede">Hike up, ride the lift down, repeat until 8,848 m. 1,461 Swiss lifts screened. For most of them the limit is how long the lift runs, not your legs.</p>
+  </div>
+</div></header>
+
+<main class="wrap stack">
+  <section class="panel day">
+    <h2>Your day, lap by lap</h2>
+    <div class="prof-head"><span class="prof-name" id="pName"></span><span class="prof-sub" id="pSub"></span></div>
+    <svg id="profile" viewBox="0 0 640 220" role="img" aria-label="Elevation over time for the selected lift"></svg>
+    <div class="board" id="stats"></div>
+  <div class="controls">
+    <div class="ctl"><label for="lift">Lift</label><select id="lift"></select></div>
+    <div class="ctl"><label for="vam">Climbing pace <output id="vamO"></output></label><input id="vam" type="range" min="500" max="1400" step="50" value="900"></div>
+    <div class="ctl"><label for="hs">Trail speed <output id="hsO"></output></label><input id="hs" type="range" min="3.5" max="6.5" step="0.25" value="5"></div>
+    <div class="ctl"><label>Pace presets</label><div class="presets" id="presets">
+      <button data-v="600" data-h="4" type="button">Average hiker</button>
+      <button data-v="900" data-h="5" type="button">Strong amateur</button>
+      <button data-v="1200" data-h="5.5" type="button">Vertical-km racer</button></div></div>
+  </div>
+  </section>
+  <section class="awards-wrap"><h2 class="aw-h">Best in each category <span id="awPace"></span></h2><div class="awards" id="awards"></div></section>
+
+  <div class="grid even">
+    <section class="panel">
+      <h2>Opening hours against what you need</h2>
+      <details class="howto"><summary>How to read this</summary><p class="cap" id="tcap"></p></details>
+      <div class="legend"><span><svg width="18" height="10"><rect y="1" width="18" height="8" rx="2" fill="var(--grid)" stroke="var(--line)"/></svg>Lift running</span><span><svg width="18" height="10"><rect y="3" width="18" height="4" rx="2" fill="var(--s1)"/></svg>Your lift time</span><span><svg width="18" height="10"><rect y="3" width="18" height="4" rx="2" fill="var(--crit)"/></svg>Past closing</span><span><svg width="18" height="10"><line x1="0" x2="18" y1="5" y2="5" stroke="var(--muted)" stroke-dasharray="2 2"/></svg>First climb before opening</span></div>
+      <svg id="gantt" viewBox="0 0 640 600" role="img" aria-label="Opening window and required lift time per lift"></svg>
+    </section>
+    <section class="panel">
+      <h2>How fit do you need to be?</h2>
+      <details class="howto"><summary>How to read this</summary><p class="cap">For each checked lift, the slowest climbing pace that still gets all your laps done between its first and last ride, at your trail speed. The red line is your pace. Dots left of it fit.</p></details>
+      <svg id="minpace" viewBox="0 0 640 600" role="img" aria-label="Minimum climbing pace needed per lift"></svg>
+    </section>
+  </div>
+  <div class="grid even">
+    <section class="panel">
+      <h2>When they run</h2>
+      <details class="howto"><summary>How to read this</summary><p class="cap">Solid bars are the periods whose timetable this page uses. Faint bars are other operating periods, often with shorter hours. The shaded band marks the longest days of the year, the best time for an attempt.</p></details>
+      <svg id="season" viewBox="0 0 640 600" role="img" aria-label="Operating season per lift"></svg>
+    </section>
+    <section class="panel">
+      <h2>Price against distance</h2>
+      <details class="howto"><summary>How to read this</summary><p class="cap">Lift fares for one attempt with your Halbtax, against travel time from Zürich. A green ring means the GA is fully valid, so a day GA (from CHF 29, train included) makes every ride free.</p></details>
+      <svg id="costtr" viewBox="0 0 640 560" role="img" aria-label="Cost per attempt against travel time"></svg>
+    </section>
+  </div>
+  <div class="grid even">
+    <section class="panel">
+      <h2>Which lifts fit inside a day of operation?</h2>
+      <details class="howto"><summary>How to read this</summary><p class="cap">Each dot is one lift. Hours on the y-axis are how long you need the lift running, assuming your first climb ends as it opens. Steeper trails sit lower. Click a dot to select it.</p></details>
+      <div class="legend" id="legS"></div>
+      <svg id="scatter" viewBox="0 0 640 380" role="img" aria-label="Scatter of trail grade against lift hours needed"></svg>
+    </section>
+    <section class="panel">
+      <h2>Is the trip worth it?</h2>
+      <details class="howto"><summary>How to read this</summary><p class="cap">Lift hours needed against travel time. The dashed staircase links the lifts that nothing else beats on both: no other lift is closer and also quicker. Hover a dot to see the door-to-door day.</p></details>
+      <svg id="dist" viewBox="0 0 640 380" role="img" aria-label="Scatter of travel time from Zürich against lift hours needed"></svg>
+    </section>
+  </div>
+  <div class="grid b">
+    <section class="panel">
+      <h2>Where they are</h2>
+      <details class="howto"><summary>How to read this</summary><p class="cap">Valley stations, coloured by the same status. Travel times are from Zürich HB by public transport.</p></details>
+      <svg id="map" viewBox="0 0 360 240" role="img" aria-label="Map of Switzerland with lift valley stations"></svg>
+    </section>
+    <section class="panel">
+      <h2>Long laps or short laps?</h2>
+      <details class="howto"><summary>How to read this</summary><p class="cap">Where the hours go on the shortlist. Each lap adds a lift ride and a wait, but the trail-distance share is usually larger. A steep trail beats fewer laps.</p></details>
+      <div class="legend"><span><svg width="12" height="12"><rect width="12" height="12" rx="2" fill="var(--s1)"/></svg>Climbing (vertical pace)</span><span><svg width="12" height="12"><rect width="12" height="12" rx="2" fill="var(--s2)"/></svg>Extra for trail distance</span><span><svg width="12" height="12"><rect width="12" height="12" rx="2" fill="var(--s3)"/></svg>Lift wait + ride down</span></div>
+      <svg id="bars" viewBox="0 0 560 420" role="img" aria-label="Stacked bars of hours per shortlist lift"></svg>
+    </section>
+  </div>
+
+  <details class="method-d"><summary>How this was measured, the time model, and ways to stretch the day</summary>
+  <section class="method">
+    <div><h3>How it was measured</h3><ul>
+      <li>Lifts: OpenStreetMap cable cars, gondolas and funiculars, plus the Uetliberg, Rigi and Pilatus railways. Chairlifts are left out because almost all are ski-only.</li>
+      <li>Rise: swisstopo heights at both stations.</li>
+      <li>Trail: BRouter mountain-hiking route from the valley station to the top station.</li>
+      <li>Travel: transport.opendata.ch, weekday morning.</li></ul></div>
+    <div><h3>The time model</h3>
+      <p>Climb time per lap uses DIN 33466, the standard the alpine clubs use for hiking times: the larger of distance time and ascent time, plus half the smaller. The rates come from your sliders.</p>
+      <p>Laps = ⌈8 848 ÷ rise⌉. Each descent adds the ride, a wait (half the departure interval, about 1 min for gondolas) and 2 min to change over.</p>
+      <p>Lab work on vertical-km racing (Giovanelli et al. 2016) puts the lowest energy cost per metre climbed at about 20–30° (36–58 %). No trail here averages that steep, so steeper is always better.</p></div>
+    <div><h3>Ways to stretch the day</h3><ul>
+      <li>Bookend laps: walk down on foot before the lift opens and after it closes.</li>
+      <li>Go on a weekday in June or July for the most daylight and no queues.</li>
+      <li>With a Halbtax, a day GA (Spartageskarte) makes every descent free on GA-valid lifts and covers the train there.</li>
+      <li>Official Everesting run/hike rules allow lift descents.</li></ul></div>
+  </section>
+</details>
+</main>
+<div id="tip" hidden></div>
+
+<script>
+const ROWS = [["Zermatt–Sunnegga funicular","funicular",200,653,1.8,3,5,2624.4,1096.8,203,"day",0,null],["Ragnatsch-Hinterspina","cable_car",4,755,1.96,5.8,7.8,2749,1215,66,"small",0,null],["Luftseilbahn Kandersteg-Allmenalp","cable_car",8,544,1.51,5.5,7.5,2617.1,1148.7,144,"day",0,null],["Luftseilbahn Kälti-Stanserhorn (CabriO)","cable_car",60,1138,4.99,5.2,7.2,2669.5,1200,null,"day",0,null],["Morgins-Foilleuse","gondola",10,505,2.08,5,1,2555.2,1120.7,234,"small",0,null],["Francey-Le Moléson","cable_car",60,461,1.47,4,6,2568.2,1156.1,null,"?",0,null],["Mürrenbahn","cable_car",150,684,3.07,3.6,5.6,2635.9,1160.9,144,"long",1,null],["Grimentz - Bendolla","gondola",12,531,2.3,5.4,1,2610.4,1113.9,217,"small",0,null],["Luftseilbahn Golzern","cable_car",0,565,2.29,3.5,5.5,2697.2,1180.3,112,"?",0,null],["Tracouet","gondola",8,809,3.93,8,1,2588.6,1114.3,191,"small",0,null],["Luftseilbahn Brunnen-Urmiberg","cable_car",6,702,2.51,7,9,2687.7,1206.2,74,"small",0,null],["Luftseilbahn Engelberg-Fürenalp","cable_car",8,759,2.73,7.9,9.9,2677.1,1183.9,122,"day",0,null],["Les Marécottes - La Creusaz","gondola",4,656,2.99,5.1,1,2566.6,1106.7,204,"small",0,null],["Luftseilbahn Schwägalp-Säntis","cable_car",85,1118,4.88,10,12,2742.2,1235.7,122,"day",0,null],["Stockhornbahn","cable_car",52,914,3.94,6.5,8.5,2608.2,1167.7,123,"day",0,null],["Gemmibahn","cable_car",35,921,4.19,4.6,6.6,2614.4,1136.9,195,"day",0,null],["Ried Mörel - Riederalp","gondola",6,732,3.01,7.3,1,2645.9,1134.5,167,"long",1,null],["Luftseilbahn Silenen-Chilcherberge","cable_car",4,604,2.31,6,8,2694.3,1182.9,90,"small",0,null],["Luftseilbahn Kies-Mettmen","cable_car",20,558,2.58,3.3,5.3,2725.7,1203.2,null,"?",0,null],["Milchseilbahn","cable_car",8,863,2.77,10,12,2742.9,1189.5,131,"small",0,null],["Chur - Känzeli","cable_car",45,593,2.94,3,5,2759.2,1190.6,83,"day",0,null],["Globi Luftseilbahn","cable_car",18,559,2.63,3.2,5.2,2609.8,1145.3,166,"?",0,null],["Aeugstenbahn","cable_car",8,958,3.42,8.6,10.6,2725,1210.2,70,"small",0,null],["Tzoumaz","gondola",8,810,4.15,9,1,2584.1,1110.4,224,"small",0,null],["Luftseilbahn Beatenberg-Niederhorn","gondola",17,810,4.14,9.2,1,2625,1171.1,155,"?",0,null],["Gstaad-Eggli","gondola",10,516,2.31,5,1,2588,1146.3,192,"small",0,null],["Gondelbahn Stöfeli-Chäserrugg","gondola",10,386,1.89,4.3,1,2742.1,1226.3,null,"small",0,null],["Mörel-Greich-Riederalp","cable_car",80,1137,5.66,6.3,8.3,2646.7,1134.1,144,"long",1,null],["Unter dem Birg-Engstligenalp","cable_car",36,562,2.68,3.3,5.3,2609.8,1145.3,166,"?",0,null],["Luftseilbahn Sörenberg-Brienzer Rothorn","cable_car",80,1040,4.68,6.3,8.3,2647.4,1184.2,113,"day",0,null],["Schwandibahn","cable_car",4,635,2.99,5.6,7.6,2692.7,1186.1,79,"small",0,null],["Gstaad - Bodme","gondola",4,536,2.54,6.9,1,2588.2,1145.8,189,"small",0,null],["Luftseilbahn Lungern-Turren","cable_car",55,827,4.08,5,7,2654.3,1181.8,118,"?",0,null],["Mörel - Ried Mörel","gondola",6,423,2.22,4.1,1,2646.7,1134.1,144,"long",0,null],["Luftseilbahn Schattdorf-Haldi","cable_car",15,598,2.55,6.3,8.3,2692.8,1191.2,93,"small",0,null],["Luftseilbahn Staldenried - Gspon","cable_car",12,739,3.4,7.7,9.7,2634.4,1119.8,150,"small",0,null],["Niesenbahn upper section (Schwandegg–Kulm)","funicular",0,674,2.87,4.3,6.3,2617.5,1165.7,null,"day",0,null],["Luftseilbahn Kohlplatz–Brüsti","cable_car",8,924,3.7,10.3,12.3,2690.3,1190.2,83,"small",0,null],["Luftseilbahn Diegisbalm-Oberalp","cable_car",4,403,1.49,5.4,7.4,2671.2,1194.1,84,"small",0,null],["Unnamed lift near Stalden VS","",0,714,3.44,3.3,5.3,2633.7,1121.1,138,"?",0,null],["San Bartolomeo-Alpe Bardughè","cable_car",4,1174,5.04,10.1,12.1,2708.8,1120.9,150,"small",0,null],["Harderbahn","funicular",0,726,3.22,4.1,6.1,2632.6,1171.2,122,"day",0,null],["Anzère - Intermédiaire - Pas de Maimbré","gondola",8,814,4.46,8,1,2596.6,1127.1,200,"small",0,null],["Heiligkreuz-Chummibort","cable_car",0,633,3.13,5.2,7.2,2656.6,1132.6,196,"?",0,null],["Luftseilbahn Intschi-Arnisee","cable_car",8,712,3.07,6.3,8.3,2692.5,1179.5,99,"small",0,null],["Gondelbahn Vals - Gadastatt","gondola",8,529,2.71,6.7,1,2732.9,1163.5,170,"small",0,null],["Funiculaire du Châtelard","funicular",0,695,3.62,4,6,2562.8,1101.3,214,"?",0,null],["Rothorn 2","cable_car",60,949,4.35,6,8,2763.1,1179,null,"?",0,null],["Embd-Schalb","cable_car",4,477,2.08,4.5,6.5,2629.9,1118.3,161,"small",0,null],["Betten Dorf - Bettmeralp","cable_car",50,719,3.46,4,6,2648.4,1136.2,172,"long",1,null],["Fiesch-Fiescheralp","gondola",10,1144,6.44,9.2,1,2653.5,1139.6,170,"small",0,null],["Niesenbahn lower section (Mülenen–Schwandegg)","",0,461,2.19,2.5,4.5,2618.3,1165.5,null,"day",0,null],["Unnamed lift near Sobrio","cable_car",0,1040,5.24,5.5,7.5,2712.3,1140,180,"?",0,null],["Luftseilbahn Blatten - Belalp","cable_car",80,760,3.97,4.3,6.3,2642,1134.3,160,"?",0,null],["Veysonnaz","gondola",8,758,4.04,9.2,1,2592.6,1116,199,"small",0,null],["Lenk - Stoss","gondola",6,539,2.77,6.1,1,2599.9,1144.6,182,"small",0,null],["La Videmanette","gondola",8,1186,6.07,10.6,1,2582.3,1148.3,199,"small",0,null],["Gurschen-Bahn","cable_car",60,770,3.82,5,7,2688.3,1165.2,131,"?",0,null],["Unnamed funicular","funicular",0,570,2.4,6.5,8.5,2563.7,1206.5,106,"?",0,null],["Gondelbahn Kreuzboden - Hohsaas","gondola",8,744,4.28,7.9,1,2640.6,1109.8,null,"small",0,null],["Luftseilbahn Fräkmüntegg-Pilatus Kulm","cable_car",55,646,3.38,4,6,2661.8,1204.7,103,"?",0,null],["Funivia Camorino-Alpe Croveggia","cable_car",4,614,2.55,6.9,8.9,2721.3,1113.5,118,"small",0,null],["Längfluh","cable_car",60,416,1.96,2.8,4.8,2635.6,1104.6,null,"?",0,null],["Spielbodenbahn","gondola",10,618,3.15,7,1,2637.2,1105.5,200,"small",0,null],["Gondelbahn Blatten - Chiematte","gondola",8,726,3.71,6.9,1,2642,1134.3,160,"small",0,null],["Sesselbahn/Gondelbahn Alt St.Johann-Sellamatt","gondola",4,499,2.76,5.7,1,2740.1,1228.6,109,"small",0,null],["Braunwaldbahn","funicular",0,603,3.12,4.2,6.2,2719.1,1198.7,90,"long",1,null],["Matterhorn Express 2","gondola",8,729,3.69,6.8,1,2622.7,1094.5,233,"small",0,null],["Luftseilbahn Bristen-Waldiberg","cable_car",4,392,1.52,5.3,7.3,2695.9,1180.6,105,"small",0,null],["Fionnay-Plan du Tsenau","cable_car",4,649,3.13,6,8,2589.8,1098,null,"small",0,null],["Drehgondelbahn Stuckli Rondo","gondola",8,405,2.08,6.6,1,2690.8,1214.9,65,"small",0,null],["Flaschen - Torrentalp","gondola",6,381,1.97,4.1,1,2614.2,1134.4,196,"small",0,null],["Madrisabahn","gondola",4,748,4.14,11,1,2785.7,1195.5,110,"small",0,null],["Palfriesbahn","gondola",8,1248,5.86,10.2,1,2748.5,1215.3,66,"small",0,null],["Seilbahn Vättnerberg","cable_car",4,621,2.77,6,8,2753.6,1198.7,125,"small",0,null],["Kalpetran-Embd","cable_car",8,510,2.38,4.6,6.6,2630.7,1118.2,145,"small",0,null],["Plattjen","gondola",6,771,4.31,7.2,1,2637.7,1105.8,193,"small",0,null],["Linthal Kavernenzentrale Muttsee - Wasserschloss Muttenkopf","",0,551,2.85,2.4,4.4,2720.1,1189.6,null,"?",0,null],["Gondelbahn Rosswald","gondola",6,791,4.24,6.3,1,2645.2,1129.3,153,"small",0,null],["10er Gondel Somtgant","gondola",10,509,2.88,4.5,1,2763.4,1162.5,null,"small",0,null],["Funivia Lumino - Monti Saurù","cable_car",4,994,5.39,10,12,2725.8,1121.5,120,"small",0,null],["Telecabina Monte Tamaro","gondola",4,1051,5.84,8.7,1,2714.5,1109.5,129,"small",0,null],["Unnamed cable_car","cable_car",0,1341,7.42,7.2,9.2,2704.7,1161.1,null,"?",0,null],["Tällibahn (Pendelbahn Fuhren - Birchlaui)","cable_car",8,543,2.35,6.4,8.4,2668.7,1176.1,185,"small",0,null],["Luftseilbahn Isenfluh-Sulwald","cable_car",8,425,2.16,4,6,2635,1163.3,165,"small",0,null],["Luftseilbahn Geissmattli-Bielen","cable_car",4,559,3.04,4.7,6.7,2671.4,1192.4,88,"small",0,null],["Gondelbahn Trübsee-Stand (TITLIS-Xpress)","gondola",8,621,3.35,7.3,1,2673.2,1182.9,126,"small",0,null],["Fiescheralp - Eggishorn","cable_car",45,653,3.54,4.6,6.6,2651.1,1140.4,203,"?",0,null],["Luftseilbahn Turmmatt-Gitschenberg","cable_car",4,928,4.75,8.2,10.2,2688.9,1193.4,84,"small",0,null],["Betten - Bettmeralp","cable_car",125,1083,5.44,5.6,7.6,2649.1,1135.8,151,"long",1,null],["Téléphérique Dorénaz-Allesse-Champex","cable_car",10,675,3.08,6.5,8.5,2569.5,1111.1,204,"small",0,null],["Flüelen-Oberaxen","cable_car",4,527,2.57,6.3,8.3,2690.4,1196.8,81,"small",0,null],["Wengen LWM","cable_car",80,948,5.08,5,7,2637,1161.8,165,"?",0,null],["Unnamed funicular","funicular",0,330,1.75,2.3,4.3,2690.1,1175.7,107,"?",0,null],["Zinal - Sorebois","gondola",10,771,4.62,6,1,2614.3,1109.6,214,"small",0,null],["Crans-Merbé-Cry d'Er","gondola",8,751,4.41,11.1,1,2602.2,1128.6,197,"small",0,null],["Bettmeralp - Bettmerhorn","gondola",8,663,3.66,8.5,1,2648.1,1138.1,190,"small",1,null],["Torrentalp - Rinderhütte","gondola",6,377,2.08,5.3,1,2615.1,1134.5,197,"small",0,null],["Eggweid - Rinderberg","gondola",6,550,2.9,7.6,1,2594.2,1152.7,null,"small",0,null],["Luftseilbahn Trübsee-Stand","cable_car",80,622,3.16,4.9,6.9,2673.3,1182.9,126,"?",0,null],["Blauherd - Rothorn","cable_car",150,528,3.06,3.5,5.5,2626.9,1096.2,221,"?",0,null],["Luftseilbahn Beckenried-Klewenalp","cable_car",80,1140,6.88,7,9,2678.7,1202.2,94,"?",0,null],["Unnamed cable_car","cable_car",0,486,2.51,3.8,5.8,2580.4,1140.8,232,"?",0,null],["Älplibahn Malans","gondola",8,1188,6.7,13,1,2762.1,1206.1,77,"small",0,null],["Staubernbahn","cable_car",8,1241,5.39,12,14,2753.8,1235,109,"small",0,null],["Rotenfluebahn","gondola",8,443,2.39,10,1,2693.6,1207.8,78,"small",0,null],["Seilbahn Tierfehd-Kalktrittli","cable_car",8,1054,5.44,8.7,10.7,2717.6,1193.2,null,"small",0,null],["Alp Sigel-Bahn","cable_car",4,654,3.48,6,8,2753.2,1239.4,118,"small",0,null],["Thunersee-Beatenberg-Bahn","funicular",0,557,3.14,5.1,7.1,2623.6,1170.5,119,"?",0,null],["Grächen - Hannigalp","gondola",8,501,3,6.3,1,2631.1,1116.2,182,"small",0,null],["Niesenbahn lower section (Mülenen–Schwandegg)","funicular",0,979,4.89,6,8,2619.3,1165.4,109,"day",0,null],["Luftseilbahn Matt-Weissenberge","cable_car",14,404,2.31,3,5,2731.9,1202.5,94,"small",0,null],["Kumme","gondola",8,526,3.4,4.7,1,2625.9,1098.3,203,"small",0,null],["St. Niklaus - Sparren","cable_car",4,730,3.65,6.1,8.1,2627.9,1113.8,162,"small",0,null],["Funispace","cable_car",30,527,3.04,4.3,6.3,2585.7,1104.4,null,"?",0,null],["Médran 4","gondola",10,664,3.98,6,1,2584.2,1104.7,225,"small",0,null],["LAAX - Crap Sogn Gion","cable_car",120,1130,6.81,9.3,11.3,2739.2,1187.1,126,"?",0,null],["Luftseilbahn Wasserauen-Ebenalp","cable_car",40,722,4.1,3.7,5.7,2750.5,1239.2,119,"day",0,null],["Marolires - Violettes (Violettes Express)","gondola",6,570,3.4,7.2,1,2604.4,1130.5,197,"small",0,null],["Prarion-Plan-du-Fou","gondola",8,601,3.88,5.5,1,2587.7,1110.8,null,"small",0,null],["Brunnenbergbahn","cable_car",8,487,2.3,5.5,7.5,2721.4,1202.9,90,"small",0,null],["Teleferica Rodì-Fiesso – Tremorgio","cable_car",8,894,5.96,4,6,2699.6,1149.5,145,"small",0,null],["Unnamed funicular","funicular",0,439,1.97,5.5,7.5,2584.6,1220.6,79,"?",0,null],["Motta Naluns","gondola",8,855,5.05,8.2,1,2817.6,1186.6,161,"small",0,null],["Mazembroz-Beudon","cable_car",4,392,2.04,3.8,5.8,2577.6,1111.7,196,"small",0,null],["Lagalp","cable_car",60,784,4.27,5.6,7.6,2796.4,1146,231,"?",0,null],["Gant - Hohtälli","cable_car",125,1058,5.89,6.5,8.5,2627,1095.3,221,"?",0,null],["Luftseilbahn Äsch-Oberalp","cable_car",2,614,3.19,6.2,8.2,2704.9,1191.4,null,"small",0,null],["Disentis-Caischavedra","cable_car",90,633,3.92,5.1,7.1,2707.2,1173.2,167,"?",0,null],["Unnamed lift","",0,389,2.31,2.5,4.5,2716.8,1093.5,135,"?",0,null],["Luftseilbahn Hoher Kasten","cable_car",50,867,4.68,6.3,8.3,2752.6,1240.4,118,"day",0,null],["Weissensteinbahn","gondola",6,616,3.51,10,1,2604.1,1231.6,77,"day",0,null],["Médran 2","gondola",4,668,4.1,6,1,2584.1,1104.7,225,"small",0,null],["Luftseilbahn St. Niklaus - Jungen","cable_car",4,838,4.39,10,12,2628.1,1114.2,155,"small",0,null],["Mürren - Birg","cable_car",80,1035,6.25,6.5,8.5,2634.7,1156.4,173,"?",0,null],["Leukerbad - Rinderhütte","cable_car",80,927,5.85,4.3,6.3,2614.7,1135.9,190,"?",0,null],["Villars - Roc d'Orsay","gondola",8,680,3.84,8.2,1,2570.4,1128.1,194,"small",0,null],["Älplerseil (Luftseilbahn Untertrübsee-Trübsee)","cable_car",8,447,2.24,6.3,8.3,2671.5,1184.8,129,"small",0,null],["Luftseilbahn Flüelen-Eggberge","cable_car",15,1011,6.09,9,11,2690.6,1194.3,77,"small",0,null],["Bad Ragaz-Pardiel","gondola",8,1132,7.7,11.6,1,2754.7,1209.4,null,"small",0,null],["Unnamed cable_car","cable_car",0,1646,9.21,7.5,9.5,2636.9,1127.3,129,"?",0,null],["Standseilbahn Unterwasser-Iltios","funicular",0,429,2.41,4,6,2741.7,1228.8,108,"?",0,null],["Niesenbahn Mülenen→Niesen Kulm (2 sections)","funicular",0,1652,7.71,18.1,20.1,2619.3,1165.4,109,"day",0,null],["Unnamed funicular","funicular",0,389,2.31,3,5,2716.8,1093.5,135,"?",0,null],["Unnamed funicular","funicular",0,706,4.03,6.6,8.6,2787.6,1153.8,188,"?",0,null],["Funivia Orselina - Cardada","cable_car",40,949,5.68,4.8,6.8,2704.5,1114.7,147,"?",0,null],["Surlej-Murtèl","cable_car",125,831,5.1,6.4,8.4,2782.5,1147.6,207,"?",0,null],["Luftseilbahn Dallenwil-Wirzweli","cable_car",44,647,3.97,5.1,7.1,2672.2,1197.6,93,"?",0,null],["Kistenbahn Starkenbach-Selun (Selunbahn)","cable_car",4,670,3.31,8.1,10.1,2737.3,1227.4,100,"small",0,null],["Salins - Cuolm da Vi","cable_car",70,718,4.14,5.5,7.5,2701.8,1171.1,183,"?",0,null],["Luftseilbahn Post-Haldiwald","cable_car",0,499,3.17,3.2,5.2,2674.6,1193.5,99,"?",0,null],["Weisshornbahn 2. Sektion","cable_car",125,621,3.53,4.9,6.9,2769.8,1184.1,210,"?",0,null],["Männlichenbahn","gondola",10,598,3.77,10.3,1,2641.4,1163.5,null,"small",0,null],["Chapfbahn","funicular",0,599,3.99,3.2,5.2,2661.6,1171.1,null,"?",0,null],["Riffelberg-Express","gondola",8,714,4.53,7.5,1,2622.7,1094.5,null,"small",0,null],["Téléphérique de service Barberine - Col de la Gueulaz","cable_car",0,782,4.67,5,7,2561.5,1100,218,"?",0,null],["Elsigbach-Elsigenalp","cable_car",40,474,2.37,7,9,2612.9,1153.1,null,"?",0,null],["Siviez","gondola",8,708,4.68,6.5,1,2590.5,1109.3,null,"small",0,null],["Funivia Monte Carasso-Mornera","cable_car",8,1102,4.95,13,15,2720.3,1116.5,119,"small",0,null],["Luftseilbahn Dallenwil-Niederrickenbach","cable_car",30,649,3.95,5.7,7.7,2673,1197.9,83,"?",0,null],["Luftseilbahn Weid-Furggelen","cable_car",3,380,2.01,4.1,6.1,2684.9,1196.3,102,"small",0,null],["Luftseilbahn Hofstetten-Wilerli","cable_car",3,619,3.6,5.2,7.2,2691.4,1187.4,96,"small",0,null],["Seilbahn Sanetsch","cable_car",8,849,4.58,10,12,2587.8,1136.1,null,"small",0,null],["Stoosbahn (Schlattli–Stoos)","funicular",0,738,5.12,5.2,7.2,2693.9,1205.2,79,"long",0,null],["Rotenfluebahn","gondola",8,515,2.93,10,1,2695.1,1208.2,87,"small",0,null],["Luftseilbahn Hinterbergen","cable_car",4,574,2.94,8,10,2679.8,1206.9,null,"small",0,null],["Gondelbahn Elm-Ämpächli","gondola",6,464,2.96,4.5,1,2731.3,1197.3,null,"small",0,null],["Pischabahn","cable_car",100,682,4.21,8,10,2787.6,1186.4,null,"?",0,null],["Luftseilbahn Weggis-Rigi Kaltbad","cable_car",80,932,6,5.4,7.4,2676.2,1209.7,76,"day",1,null],["Pranzaira-Albigna","cable_car",8,899,6.05,7,9,2769.7,1136.5,null,"small",0,null],["Luftseilbahn Iltios-Chäserrugg","cable_car",80,917,5.76,8,10,2742,1227.7,null,"?",0,null],["Luftseilbahn Chäppeliberg-Gitschen","cable_car",4,531,2.93,7,9,2695,1200.2,null,"small",0,null],["FlemXpress Startgels - Segnes","gondola",10,485,3.12,5.7,1,2738.2,1191.1,null,"small",0,null],["FlemXpress Segnes - Cassons","gondola",10,403,2.69,6.2,1,2737.3,1192.3,null,"small",0,null],["Leysin - Berneuse","gondola",6,712,4.59,10,1,2567.6,1133,207,"small",0,null],["Télécabine Vercorin - Crêt-du-Midi","gondola",10,550,3.21,10.1,1,2607.4,1122.5,null,"small",0,null],["Luftseilbahn Wiler-Lauchernalp","cable_car",100,566,3.56,5,7,2626.1,1139,null,"?",0,null],["Hörnli-Express","gondola",6,661,4.11,11.1,1,2769.6,1182.6,null,"small",0,null],["Hannig","gondola",10,520,3.43,4.3,1,2637.8,1106.6,186,"small",0,null],["Luftseilbahn Emmetten-Niederbauen","cable_car",8,798,4.24,8.7,10.7,2682.2,1201.1,109,"day",0,null],["Téléphérique Riddes - Isérables","cable_car",0,616,3.8,4.9,6.9,2583.2,1113.3,186,"?",0,null],["Savoleyres","gondola",4,750,5.11,12.3,1,2583.5,1105.8,242,"small",0,null],["Parsennbahn","funicular",0,449,2.41,6.6,8.6,2782,1188.1,null,"?",0,null],["Tortin - Col des Gentianes","cable_car",125,845,5.19,7.5,9.5,2589.6,1106.9,null,"?",0,null],["TMX Savoleyres","mixed_lift",6,400,2.02,5.5,7.5,2584.3,1107.1,null,"small",0,null],["Gondelbahn Saas-Grund - Kreuzboden","gondola",8,842,5.76,9,1,2638.6,1108.6,null,"small",0,null],["Stand-Xpress II","gondola",10,626,4.12,6,1,2602.2,1143.7,181,"small",0,null],["Funitel Violettes-Plaine Morte","gondola",30,652,4.32,10,1,2604.6,1132.4,null,"?",0,null],["Luftseilbahn Wolfenschiessen-Brändlen","cable_car",4,638,4.37,4.9,6.9,2673.3,1195.8,null,"small",0,null],["Fuorcla-Vorab","gondola",8,450,2.94,7.7,1,2733.4,1190.4,null,"small",0,null],["Funivia Arvigo-Braggio","cable_car",8,477,2.93,4.5,6.5,2729.1,1129,153,"small",0,null],["Luftseilbahn Amsteg-Arnisee","cable_car",4,789,4.77,6,8,2693.7,1181.1,100,"small",0,null],["Kumme","gondola",8,442,2.79,6.1,1,2627.2,1098.4,235,"small",0,null],["Furi - Trockener Steg","cable_car",125,1061,6.55,7.5,9.5,2622.7,1094.4,233,"?",0,null],["Unnamed funicular","funicular",0,781,5.2,4,6,2694.9,1152.6,138,"?",0,null],["Alpin Express I","gondola",30,801,4.9,11,1,2637.9,1106.2,189,"?",0,null],["Téléphérique Chalais - Vercorin","cable_car",15,787,4.73,7,9,2605.6,1124,159,"small",0,null],["Luftseilbahn Fell-Chrüzhütte","cable_car",15,807,5.45,8.9,10.9,2674.9,1192.9,101,"small",0,null],["Moléson Village-Plan Francey","",0,404,2.68,3.5,5.5,2569.3,1156.6,164,"?",0,null],["Unnamed funicular","funicular",0,301,1.89,2.2,4.2,2698.9,1109.9,156,"?",0,null],["Sils-Furtschellas","cable_car",80,512,3.25,3.9,5.9,2779.4,1145,213,"?",0,null],["Tschinglenbahn","cable_car",4,487,2.38,8,10,2733,1197.7,112,"small",0,null],["Châble - Mayens de Bruson","gondola",8,824,6.13,8.3,1,2582.7,1103,210,"small",0,null],["Panoramabahn Heidbüel","gondola",8,682,5.4,5.5,1,2760.6,1182.8,106,"small",0,null],["Luftseilbahn Spiringen-Ratzi","cable_car",8,563,3.3,7.9,9.9,2698.5,1192.1,119,"small",0,null],["Adelboden-Tschentenalp","cable_car",15,572,3.48,6.3,8.3,2609.1,1149.1,153,"small",0,null],["Männlichenbahn","gondola",10,682,5.17,8.7,1,2644.4,1163.9,151,"small",0,null],["SeeJet Sektion 2 (Oberterzen - Tannenboden)","gondola",8,720,4.94,7.8,1,2738,1218.5,79,"small",0,null],["Luftseilbahn Turtmann - Unterems - Oberems","cable_car",10,690,4.2,10,12,2620.2,1127.5,161,"small",0,null],["Bergläger-Sillerenbühl","gondola",6,487,3.39,5,1,2607.2,1146.4,null,"small",0,null],["Funivia Monte Lema","cable_car",15,848,4.62,13,15,2709.8,1097.9,170,"small",0,null],["Gondelbahn Saxli-Schönhalden","gondola",4,848,6.03,8.5,1,2745.1,1215.9,96,"small",0,null],["Oberschwend-Rigi Burggeist","cable_car",8,535,2.74,9.7,11.7,2683.8,1207.5,116,"small",0,null],["Luftseilbahn Niederurnen - Morgenholz","cable_car",8,521,2.73,10.6,12.6,2722,1220.6,62,"small",0,null],["Luftseilbahn Nechimatt-Diegisbalm","cable_car",4,472,3.06,5,7,2672.1,1193.9,96,"small",0,null],["Bürgenstockbahn","funicular",0,429,2.97,3,5,2671.8,1206.2,82,"?",0,null],["Luftseilbahn Sahli-Glattalp","cable_car",8,718,4.34,8,10,2707.3,1196.8,null,"small",0,null],["TéléCharmey","gondola",8,736,4.64,11.1,1,2579.3,1163.1,148,"small",0,null],["Treib-Seelisberg-Bahn","funicular",0,327,1.88,3.6,5.6,2687.3,1204.6,112,"?",0,null],["Celerina - Marguns","gondola",6,525,3.82,8.3,1,2785.3,1154.1,186,"small",0,null],["Châble - Verbier","gondola",4,702,5.11,9,1,2582.7,1103,210,"small",0,null],["Militärbahn Oberalp","cable_car",8,611,3.52,9.1,11.1,2694.4,1168.4,177,"small",0,null],["Seilbahn Brunnital-Sittlisalp","cable_car",4,514,3.4,4,6,2701.5,1189.4,126,"small",0,null],["Gondelbahn Marbach-Marbachegg","gondola",4,588,4.02,7.1,1,2634.8,1188.9,102,"small",0,null],["Télémixte Le Brand - La Berra","mixed_lift",0,594,4.26,5.3,7.3,2578.3,1170.6,null,"?",0,null],["Jakobshornbahn Sektion 2","cable_car",60,634,4.58,6,8,2782.7,1184.5,null,"?",0,null],["Luftseilbahn Kandersteg-Sunnbüel","cable_car",44,732,4.47,7,9,2617.3,1147.3,142,"?",0,null],["Seilbahn Twärrüti-Buggialp","cable_car",2,435,2.58,5.6,7.6,2690.5,1199.9,68,"small",0,null],["Télécabine Vercorin - Crêt-du-Midi","gondola",10,455,2.96,10.1,1,2607.1,1120.9,null,"small",0,null],["Luftseilbahn Gampel-Jeizinen","cable_car",10,884,5.31,8,10,2623.2,1129.4,155,"small",0,null],["Luftseilbahn Niederrickenbach-Musenalp","cable_car",4,589,3.47,6.9,8.9,2675.3,1198.1,98,"small",0,null],["Luftseilbahn Brunni-Alpgschwänd","cable_car",8,445,2.52,8,10,2664.6,1204.4,75,"small",0,null],["Larnags-Curnius","gondola",12,480,3.2,10,1,2738.7,1187.3,130,"small",0,null],["Unnamed gondola","gondola",4,902,6.58,18,1,2663.8,1209.2,69,"small",0,null],["Seilbahn Fanas","cable_car",8,783,4.22,13.2,15.2,2769.2,1206.3,95,"small",0,null],["Stechelberg - Mürren","cable_car",85,773,5.9,2.8,4.8,2635.5,1156.1,165,"?",0,null],["Funivia Airolo–Pesciüm","cable_car",100,557,3.93,6,8,2689.3,1153.2,127,"?",0,null],["Funivia Faido-Pianaselva","cable_car",0,392,2.9,2.2,4.2,2704.4,1148.2,145,"?",0,null],["Luftseilbahn Brügg-Riedlig","cable_car",8,601,3.84,8.6,10.6,2694.8,1192.5,95,"small",0,null],["Luftseilbahn Engelberg-Ristis","cable_car",65,590,3.95,4.3,6.3,2674.5,1185.8,119,"?",0,null],["Gütsch-Express (Andermatt-Nätschen)","gondola",8,391,3.01,4.5,1,2688.6,1165.8,124,"small",0,null],["Gumenbahn","mixed_lift",0,593,4.49,5.1,7.1,2717.9,1199.8,121,"?",0,null],["Luftseilbahn Witerschwanden-Acherberg","cable_car",4,370,2.29,5.6,7.6,2697.1,1192.5,113,"small",0,null],["Luftseilbahn Reigoldswil-Wasserfallen","gondola",6,384,2.51,8,1,2619.5,1248.8,101,"small",0,null],["Schneehüenerstock-Express","gondola",10,373,2.94,4,1,2694.4,1168.4,177,"small",0,null],["Reusch - Oldenegg - Hors-service","cable_car",40,571,4.22,4.2,6.2,2584.4,1134.9,199,"?",0,null],["Champéry - Croix de Culet","cable_car",125,899,7.43,5,7,2556.2,1113.9,248,"?",0,null],["Gondelbahn Wasserwendi-Lischen-Käserstatt","gondola",6,665,4.88,10,1,2657.8,1177.4,129,"small",0,null],["Rinerhornbahn","gondola",8,594,4.62,11,1,2778.9,1179.8,156,"small",0,null],["Corviglia-Piz Nair","cable_car",100,533,3.73,6,8,2782.6,1153.5,303,"?",0,null],["Rothorn 1","gondola",8,406,3.26,5,1,2761.8,1178.7,114,"small",0,null],["Zweisimmen - Eggweid","gondola",6,508,3.59,10.7,1,2595.1,1155.5,142,"small",0,null],["Stand-Xpress I","gondola",10,396,3.24,2.5,1,2601.4,1143.4,181,"small",0,null],["Luftseilbahn Küssnacht-Seebodenalp","cable_car",15,564,3.3,11,13,2676,1214.4,58,"small",0,null],["BergJet (Tannenboden - Maschgenkamm)","gondola",8,623,4.5,10,1,2739.9,1217.3,100,"small",0,null],["Luftseilbahn Urnerboden-Fisetengrat","cable_car",6,629,3.4,11.4,13.4,2711.6,1194,132,"small",0,null],["Parsennhüttenbahn","cable_car",80,466,3.49,5,7,2782,1191.6,null,"?",0,null],["Schiferbahn 2","gondola",6,653,4.93,12,1,2780.7,1193.2,null,"small",0,null],["Känzeli - Brambüesch","gondola",4,410,3.27,5.4,1,2759.2,1189.6,null,"day",0,null],["Funiculaire Vevey–Mont-Pèlerin","funicular",0,415,2.75,5.2,7.2,2553.7,1146.5,152,"?",0,null],["Luftseilbahn Bernina-Diavolezza","cable_car",102,882,5.82,8.2,10.2,2795.5,1146.5,227,"?",0,null],["Seilbahn Schweiben - Eisten - ZumTann","cable_car",4,369,2.73,3.9,5.9,2636.4,1113.6,155,"small",0,null],["Gondelbahn Espel-Stöfeli","gondola",10,421,3.17,5.8,1,2742.6,1227.7,null,"small",0,null],["Luftseilbahn Spis-Sinsgäu","cable_car",3,452,2.71,8.3,10.3,2675.8,1193.1,101,"small",0,null],["Jakobshornbahn Sektion 1","cable_car",100,396,2.96,3,5,2782,1185,140,"?",0,null],["Cabane - Scex Rouge","cable_car",125,409,2.97,4.4,6.4,2582.7,1132.1,228,"?",0,null],["Gondelbahn Mägisalp-Planplatten (Eagle-Express)","gondola",8,528,4.39,7,1,2661,1177.9,null,"small",0,null],["Luftseilbahn Gerschnialp-Trübsee","cable_car",77,537,3.94,5.4,7.4,2672.8,1185.1,129,"?",0,null],["Diablerets express","gondola",10,548,4.28,6.5,1,2578.2,1132.7,235,"small",0,null],["Unnamed funicular","funicular",0,576,4.66,2.7,4.7,2567.8,1117.9,191,"?",0,null],["Sogn Martin - La Siala","gondola",10,831,7.01,9,1,2735.4,1190.5,null,"small",0,null],["Matterhorn Express 4","gondola",8,492,4.19,7,1,2621.1,1092.9,null,"small",0,null],["Rigi Bahn Vitznau→Rigi Kulm","rack",0,1318,8.41,35,20,2679.4,1207,87,"day",1,null],["Luftseilbahn Raron – Eischoll","cable_car",10,575,3.77,8.9,10.9,2627.9,1128,139,"small",0,null],["Stechelberg – Gimmelwald","cable_car",100,501,4.04,4,6,2635.5,1156.1,165,"?",0,null],["Funicolare Monte Brè","funicular",0,512,3.97,3.9,5.9,2718.8,1096.2,146,"?",0,null],["Funivia San Carlo-Robiei","cable_car",125,860,6.17,9.2,11.2,2683.9,1140.4,null,"?",0,null],["Luftseilbahn Waldi-Chalthütte","cable_car",4,450,3.37,5.3,7.3,2681.5,1201.1,108,"small",0,null],["Luftseilbahn Witerschwanden-Eggenbergli","cable_car",4,580,4.02,7.7,9.7,2697.4,1192.3,114,"small",0,null],["Luftseilbahn Ripshausen-Zieriberg","cable_car",3,432,3.3,4.3,6.3,2691.2,1188.1,96,"small",0,null],["Ulrichen-Altstafel","cable_car",4,498,3.48,8.1,10.1,2671.5,1147.2,null,"small",0,null],["Parsennbahn","funicular",0,658,5.2,5.6,7.6,2783.1,1186.9,138,"?",0,null],["Eiger Express","gondola",26,1403,10.8,15,1,2644.5,1163.8,155,"?",0,null],["Luftseilbahn Grafenort-Brunniswald","cable_car",4,729,5.36,7.1,9.1,2671.5,1191.4,88,"small",0,null],["Ulrichen-Altstafel","cable_car",4,1112,8.53,18.9,20.9,2667.5,1150.6,193,"small",0,null],["Pilatusbahn Alpnachstad→Pilatus Kulm","rack",0,1636,9.86,40,20,2663.9,1200.8,78,"?",0,null],["Cavadura-Schwänzelegg","gondola",8,597,5.32,8,1,2767,1203.5,111,"small",0,null],["Unnamed funicular","funicular",0,929,6.93,11.7,13.7,2607,1126.8,144,"?",0,null],["Grüsch-Cavadura","gondola",8,579,4.97,5.5,1,2767.5,1204.7,91,"small",0,null],["Luftseilbahn Vitznau –Wissifluh","cable_car",4,450,2.41,12,14,2679.8,1206.9,90,"small",0,null],["Verdasio-Monte Comino","gondola",4,607,5.53,4.5,1,2693.4,1113.5,172,"small",0,null],["Luftseilbahn St.Jakob-Gitschenen","cable_car",8,557,4.1,9.1,11.1,2682.6,1195.1,112,"small",0,null],["Emmetten-Stockhütte","gondola",6,518,4.32,5.6,1,2681.8,1201.1,null,"small",0,null],["Unnamed funicular","funicular",0,637,5.77,3.9,5.9,2751.2,1181.2,null,"?",0,null],["Luftseilbahn Sedrun-Tgom","cable_car",0,552,4.42,3.6,5.6,2701.4,1170.4,179,"?",0,null],["Lambrigge-Titter","cable_car",8,447,2.87,9.5,11.5,2653.9,1142.1,181,"small",0,null],["Gotschnaboden - Gotschnagrat","cable_car",100,504,4.23,4,6,2784.5,1192.9,null,"?",0,null],["Unnamed cable_car","cable_car",0,577,5.03,2.6,4.6,2698.7,1191.8,119,"?",0,null],["Funiculaire St-Luc - Tignousa","",80,499,4.3,4,6,2612.6,1118.7,215,"?",0,null],["Unnamed lift","",0,912,8.45,4.1,6.1,2582.4,1111.8,192,"?",0,null],["Luftseilbahn Wolfenschiessen-Wissiflue","cable_car",4,501,4.23,4.6,6.6,2672.8,1195.9,84,"small",0,null],["TITLIS Xpress (Engelberg-Trübsee-Stand)","gondola",8,798,6.65,9.4,1,2673.1,1185.5,112,"small",0,null],["Grimentz - La Vouarda","cable_car",125,1099,8.47,7.3,9.3,2610.4,1113.9,217,"?",0,null],["Luftseilbahn Meiringen-Reuti","cable_car",80,435,3.14,7,9,2657.6,1175.5,137,"?",0,null],["Jumbo","cable_car",150,641,5.69,6.3,8.3,2587,1103.2,null,"?",0,null],["Gütsch-Express (Nätschen-Gütsch)","gondola",8,534,4.89,7.2,1,2689.5,1166.4,null,"small",0,null],["Luftseilbahn Dallenwil-Wiesenberg","cable_car",0,517,3.76,8,10,2672.5,1198.4,79,"?",0,null],["Luftseilbahn Raron - Unterbäch","cable_car",25,586,5.03,4,6,2627.9,1128,139,"?",0,null],["Klosters - Gotschnaboden","cable_car",125,589,4.71,6,8,2786.1,1193.8,110,"?",0,null],["Firstbahn","gondola",6,501,3.59,21,1,2646.2,1163.9,null,"small",0,null],["Zott - Alpe Salèi","cable_car",4,797,6.46,7.1,9.1,2687.1,1120.8,null,"small",0,null],["Luftseilbahn Kräbel-Rigi Scheidegg","cable_car",15,877,7.01,8.2,10.2,2683,1210.5,58,"small",0,null],["Saanenmöser - Saanenwald - Saanerlochsgrat","gondola",10,520,4.53,7.7,1,2590.7,1151,null,"small",0,null],["Chantarella–Corviglia","funicular",0,470,4.21,4.9,6.9,2783.9,1152.9,null,"?",0,null],["Luftseilbahn Fellboden-Bannalpsee","cable_car",8,676,5.47,7.4,9.4,2674.9,1192.8,null,"small",0,null],["Firstbahn","gondola",6,391,2.47,21,1,2646.9,1166.4,null,"small",0,null],["Stöckalp - Melchsee-Frutt","gondola",15,854,7.89,11,1,2664.2,1183.8,null,"small",0,null],["Barboleuse - Les Chaux","gondola",4,553,4.83,9.3,1,2572.1,1125.9,219,"small",0,null],["Luftseilbahn Ribi-Wannelen","cable_car",4,573,5.18,5.3,7.3,2702.4,1191.2,null,"small",0,null],["Luftseilbahn Jakobsbad-Kronberg","cable_car",0,771,6.98,7.5,9.5,2742.9,1242.7,92,"?",0,null],["Uetlibergbahn (S10) Triemli→Uetliberg","rack/rail",0,333,2.35,10,7,2679.8,1246.6,21,"long",1,null],["Arena Express Flims - Plaun","gondola",8,530,5.08,11,1,2740.6,1188.6,113,"small",0,null],["Unnamed lift","",0,499,5.24,2.7,4.7,2751.1,1181.2,null,"?",0,null],["Gletscherbahn Moosfluh","mixed_lift",0,446,3.22,12,14,2646.2,1136.8,172,"?",0,null],["Rigi Bahn Arth-Goldau→Rigi Kulm","rack",0,1242,8.02,40,20,2684.4,1211.5,40,"day",1,null],["Schiferbahn 1","gondola",6,446,4.74,6,1,2781,1194.8,null,"small",0,null],["Gondelbahn Oeschinensee","gondola",8,485,4.99,7,1,2618.7,1149.6,141,"small",0,null],["Luftseilbahn Morschach-Stoos","cable_car",15,475,3.86,11.2,13.2,2691.3,1205,85,"small",0,null],["TRI-Line Weglosen-Seebli","gondola",0,421,4.53,5,1,2704.2,1208.5,84,"?",0,null],["10er Gondel Tigignas","gondola",10,423,4.85,6.3,1,2765,1162.9,152,"small",0,null],["Luftseilbahn Rugisbalm-Eggen","cable_car",4,545,5.21,8.3,10.3,2670.5,1189.3,88,"small",0,null],["Zugerberg Bahn","funicular",0,363,3.71,4.3,6.3,2682.1,1222.8,40,"?",0,null],["Les Grillesses - Le Bâté \"Malo Express\"","gondola",10,583,6.93,6,1,2597.7,1128.9,195,"small",0,null],["Luftseilbahn Rhäzüns-Feldis","cable_car",14,797,9.75,11.2,13.2,2749.9,1184.6,106,"small",0,null],["Seilbahn Handeck - Gerstenegg","cable_car",0,414,5.44,7.5,9.5,2666.5,1163.2,null,"?",0,null],["Unnamed cable_car","cable_car",10,650,7.76,23,25,2715.4,1154.9,166,"small",0,null],["Adliswil-Felsenegg","cable_car",40,307,1.59,4,6,2681.8,1240.8,34,"day",1,496],["Rotenfluebahn (both sections)","gondola",8,958,5.32,12,1,2693.6,1207.8,78,"day",0,609]];
+const BORDER = [[2757,1265.8],[2759.4,1264.4],[2764.9,1259.7],[2763.9,1251.3],[2758.1,1237.6],[2755.1,1226.7],[2754.9,1218.3],[2755.6,1214.4],[2756.8,1214.5],[2762.7,1214],[2765.7,1214.1],[2775.3,1212.1],[2783,1209.1],[2784.6,1205.6],[2785.7,1201.4],[2795,1195.9],[2805.5,1192.5],[2809,1193.8],[2821.4,1207.9],[2826.5,1205.8],[2829.8,1198.7],[2829.8,1194.8],[2826.8,1180.3],[2826.4,1172.5],[2829.7,1167.5],[2830.2,1163.5],[2829.4,1159.8],[2824.2,1159.3],[2817.2,1161],[2811.1,1167],[2806.7,1166.1],[2802.9,1164.4],[2801.1,1158.4],[2799.6,1151.3],[2800.3,1147.4],[2803.2,1144.5],[2805.5,1138.1],[2807.4,1129.8],[2808.7,1126.1],[2807.4,1124.3],[2803.8,1123],[2800.7,1124.1],[2795,1133.8],[2792.4,1137.6],[2788.2,1138.1],[2780.8,1135.4],[2769.6,1129.5],[2764.9,1129.4],[2761,1130.5],[2757.2,1135.1],[2753.9,1144.1],[2752.7,1149.8],[2750.6,1149.6],[2743.2,1151.1],[2739.9,1148.7],[2740.1,1139.4],[2739.7,1127.8],[2736.2,1120.2],[2726.2,1107],[2722.6,1101.2],[2721.2,1097.1],[2720.9,1093.6],[2722.6,1087.5],[2724.9,1081.7],[2723.1,1078.4],[2717.7,1076.5],[2713.8,1080],[2712.2,1086.3],[2703.8,1094.7],[2707.4,1102],[2706.8,1103.8],[2693,1107.3],[2687,1112.7],[2678.6,1122.1],[2677.1,1126.2],[2677.2,1139.5],[2676.7,1142.8],[2675.6,1144.3],[2671.6,1144.2],[2666.1,1139.5],[2661.1,1132.5],[2650.7,1124.6],[2649.6,1122.9],[2653.2,1115.4],[2653,1112.4],[2644.6,1100.2],[2642.9,1096.2],[2632.1,1088.5],[2627.1,1085.6],[2611.9,1091.2],[2607.7,1091.9],[2601,1088.1],[2591.4,1084.5],[2576,1081],[2570.3,1083.7],[2567.6,1086.1],[2566.3,1089.8],[2562.4,1096.3],[2558.1,1100.2],[2555.1,1104.4],[2551.1,1109],[2548.5,1112.8],[2552.1,1125.1],[2549.6,1129.4],[2548.3,1135.5],[2549.1,1139.7],[2547.7,1140.7],[2533.9,1143.3],[2522.4,1142.6],[2514.1,1138.7],[2507.3,1132],[2506.5,1130.5],[2506.9,1129.3],[2510.1,1123],[2504.3,1116.5],[2495.5,1111.5],[2489.4,1111.1],[2486.7,1112.1],[2486.7,1119.2],[2491.8,1121.7],[2496.5,1126.2],[2498.2,1132.7],[2498.8,1137.2],[2494.1,1142.8],[2494.7,1146.2],[2497.8,1152.5],[2499.6,1158.1],[2502.1,1163],[2511.8,1170.9],[2521.4,1178.8],[2523,1187.3],[2523.8,1197.7],[2525.2,1200.2],[2538.1,1206.2],[2541.3,1208.7],[2543,1212.2],[2553.1,1223.8],[2563.2,1235.3],[2565.2,1239.1],[2566.9,1241.4],[2566.9,1243.3],[2565.7,1244.7],[2560.9,1245.7],[2559.4,1249.4],[2564.5,1255.9],[2571,1259.9],[2577.2,1259.9],[2579.7,1258.1],[2579.6,1255.9],[2582.2,1253.6],[2587,1252.8],[2592.8,1253.6],[2598.6,1256],[2602.2,1261.9],[2604.2,1266.3],[2613.3,1271.4],[2619.5,1268.8],[2636.8,1268.2],[2649.3,1269.7],[2657.1,1273.2],[2666.9,1273.3],[2673.4,1271.4],[2674.6,1271.7],[2676.4,1272.2],[2678.1,1274.1],[2684.3,1275.4],[2685.1,1277],[2684.8,1278.5],[2683.7,1279.3],[2676.1,1278.4],[2673.2,1279.6],[2672.4,1282.4],[2674.8,1287.2],[2680.3,1291.3],[2685,1292.3],[2688.4,1291.3],[2696.8,1284.1],[2698.8,1283.9],[2699.9,1285.2],[2701.6,1286],[2704.5,1284.6],[2707.8,1280.1],[2708.4,1279.4],[2726.8,1281.4],[2731,1281.5],[2743.7,1273.8],[2757,1265.8]];
+const TOP = ["Ragnatsch-Hinterspina","Mörel-Greich-Riederalp","Luftseilbahn Schwägalp-Säntis","Mürrenbahn","Luftseilbahn Sörenberg-Brienzer Rothorn","Stockhornbahn","San Bartolomeo-Alpe Bardughè","Luftseilbahn Golzern","Luftseilbahn Lungern-Turren","Chur - Känzeli","Aeugstenbahn","Luftseilbahn Engelberg-Fürenalp","Luftseilbahn Brunnen-Urmiberg","Harderbahn","Luftseilbahn Kandersteg-Allmenalp","Luftseilbahn Kohlplatz–Brüsti","Luftseilbahn Staldenried - Gspon","Schwandibahn","Milchseilbahn","Braunwaldbahn","Palfriesbahn","Älplibahn Malans","Telecabina Monte Tamaro","Luftseilbahn Beckenried-Klewenalp","Adliswil-Felsenegg","Rotenfluebahn (both sections)"];
+const VER = {"Ragnatsch-Hinterspina":{"cabin":"4","verdict":"No public operator, hours or fares found. Ask Gemeinde Mels.","src":"https://www.lift-world.info/fr/lifts/15624/datas.htm"},"Mörel-Greich-Riederalp":{"season":"All year (revision 12 Apr–5 Jun, 26 Oct–11 Dec)","first":"05:52","last":"23:05","note":"Sun to 23:30; runs after 22:03 may need a call","cabin":"large","freq":":03 and :39 each hour","ht":5.1,"ga":"full","cost":35.7,"costNote":"7 singles at 5.10; free with a day GA","verdict":"Best fit: long hours, GA free, only 8 laps.","src":"https://www.aletscharena.ch/en/planning-booking/timetable-operating-hours"},"Luftseilbahn Schwägalp-Säntis":{"season":"2027: 29 May–24 Oct (new lift)","first":"07:30","last":"18:30","note":"Weekdays to 17:30, weekends 18:30","cabin":"new, large","freq":"every 30 min","ht":30,"ga":"none","cost":210,"costNote":"7 singles at 30, no Halbtax; summer pass 290","verdict":"Fewest laps but short window and CHF 30 a ride.","src":"https://saentisbahn.ch/erlebnis/schwebebahn/preise-angebote/"},"Mürrenbahn":{"season":"All year except revision weeks","first":"06:20","last":"20:12","note":"2025 timetable; new 135-person cabin since July 2026","cabin":"135","freq":"every 15 min, 30 early/late","ht":null,"ga":"full","cost":null,"costNote":"Fare not found; GA valid (unverified)","verdict":"Big cabin and long day, but 13 laps.","src":"https://www.tp-info.ch/sites/default/files/fap/2025/pdf/2461.pdf"},"Luftseilbahn Sörenberg-Brienzer Rothorn":{"season":"4 Jun–1 Nov","first":"08:30","last":"17:50","note":"Every day the same","cabin":"?","freq":"every 20 min","ht":16,"ga":"50%","cost":128,"costNote":"8 singles at 16","verdict":"Window too short; no multi-ride card.","src":"https://www.soerenberg.ch/de/infos-service/bergbahnen/preise-verguenstigungen"},"Stockhornbahn":{"season":"11 Apr–22 Nov","first":"08:50","last":"17:50","note":"Descents from Chrindi at :20 and :50","cabin":"52","freq":"every 30 min","ht":14,"ga":"50%","cost":126,"costNote":"9 singles at 14; season pass 300","verdict":"9 h window, 30-min rhythm.","src":"https://www.stockhorn.ch/informieren/fahrplan-preise/fahrplan-sommer"},"San Bartolomeo-Alpe Bardughè":{"cabin":"4","verdict":"No public timetable. Ask Capanna Bardughè.","src":"https://www.bergbahnen.org/en/database/ch/ti/vogorno/"},"Luftseilbahn Golzern":{"season":"Full hours 1 Jun–30 Sep","first":"06:00","last":"20:00","note":"Continuous from 6 people; new lift 2026","cabin":"?","freq":"every 30 min","ht":11,"ga":"none","cost":135,"costNote":"10-ride card 80 + 5 singles at 11","verdict":"Long 14 h window, but 16 short laps.","src":"https://www.lsb-golzern.ch/fahrplan"},"Luftseilbahn Lungern-Turren":{"season":"Mid May–1 Nov","first":"08:20","last":"18:00","note":"Weekdays to 17:00","cabin":"40","freq":"every 20 min","ht":12,"ga":"50%","cost":120,"costNote":"10 singles at 12","verdict":"Short window; no valley trail documented.","src":"https://turren.ch/en/cable-car/timetable"},"Chur - Känzeli":{"season":"Daily 5 Jun–25 Oct","first":"08:30","last":"17:00","note":"Weekdays to 16:30; Sat evenings to 20:00 in summer","cabin":"45","freq":"every 20 min","ht":7,"ga":"50%","cost":84,"costNote":"20-point card 84 with Halbtax","verdict":"Closes too early for 15 laps.","src":"https://www.churbergbahnen.ch/de/Bergbahnen/Betriebszeiten-Tarife"},"Aeugstenbahn":{"season":"1 May–31 Oct","first":"07:00","last":"19:00","note":"Weekdays 07:15–18:45; some runs by phone","cabin":"8","freq":"about every 30 min","ht":28,"ga":"none","cost":234,"costNote":"Solo: 12 card ride + 14 solo surcharge, 9 rides","verdict":"Solo surcharge doubles the fare; bring a partner.","src":"https://aeugstenbahn.ch/tarife/"},"Luftseilbahn Engelberg-Fürenalp":{"season":"Summer hours May–Oct","first":"08:00","last":"17:40","note":"Jul–Sep; runs from 4 people","cabin":"8","freq":"every 15–20 min","ht":14,"ga":"none","cost":154,"costNote":"11 singles at 14, no Halbtax","verdict":"Very steep path, but closes 17:40.","src":"https://www.fuerenalp.ch/oeffnungszeiten"},"Luftseilbahn Brunnen-Urmiberg":{"season":"Spring to mid Nov","first":"09:05","last":"18:05","note":"Cash only at the top","cabin":"6","freq":"every 30 min","ht":13,"ga":"none","cost":156,"costNote":"12 singles at 13, no Halbtax","verdict":"9 h window, cash only.","src":"https://www.urmiberg.ch"},"Harderbahn":{"season":"Early Apr–end Nov","first":"09:10","last":"21:40","note":"2025 timetable; some summer dates to 23:10","cabin":"funicular","freq":"every 30 min","ht":10,"ga":"50%","cost":120,"costNote":"12 singles at about 10 (2022 fare)","verdict":"Evening runs help; 2026 fares not public.","src":"https://www.jungfrau.ch/de-ch/harder-kulm/"},"Luftseilbahn Kandersteg-Allmenalp":{"season":"May–Oct (2027 from 6 May)","first":"08:30","last":"18:00","note":"17:00 from 31 Aug","cabin":"8","freq":"every 15 min","ht":14,"ga":"50%","cost":200,"costNote":"Season pass 200 beats 16 singles","verdict":"Steep, but 17 laps in a 9.5 h window.","src":"https://www.allmenalp.ch/de/luftseilbahn/preise.html"},"Luftseilbahn Kohlplatz–Brüsti":{"season":"1 Jun–30 Sep timetable","first":"07:00","last":"19:00","note":"Lunch gap 11:45–13:00; change at Kohlplatz","cabin":"8","freq":"every 30 min","ht":null,"ga":"?","cost":99,"costNote":"9 singles at 11 (full fare)","verdict":"Lunch gap and two sections slow it.","src":"https://www.xn--brsti-surenenpass-32b.ch/seilbahn-sommer"},"Luftseilbahn Staldenried - Gspon":{"season":"All year; half-hourly 9 May–25 Oct","first":"04:05","last":"21:40","note":"Fri/Sat extra 23:10; 2nd-Monday revision gaps","cabin":"10","freq":"every 30 min","ht":7.6,"ga":"50%","cost":76,"costNote":"Two 6-ride cards at 38 with Halbtax","verdict":"Longest window (17.6 h); trail unconfirmed.","src":"https://staldenried.ch/wp-content/uploads/2025/12/2025-12-14_Tarif_ab_14_Dezember_2025.pdf"},"Schwandibahn":{"season":"2 May–15 Nov, weekends only","first":"07:30","last":"18:00","note":"Lunch break 12–13; cash only","cabin":"4","freq":"every 30 min","ht":null,"ga":"?","cost":117,"costNote":"13 singles at 9 (full fare)","verdict":"Weekends only, 4-seat cabin.","src":"https://schwandibahn.ch"},"Milchseilbahn":{"season":"Tue–Sun, to 25 Oct","first":"09:00","last":"16:30","note":"Closed Mondays; booked time slots","cabin":"8","freq":"15–30 min","ht":30,"ga":"none","cost":300,"costNote":"10 rides at 30, no discounts","verdict":"Expensive and short day.","src":"https://www.flimslaax.com/milchseilbahn"},"Braunwaldbahn":{"season":"All year, daily","first":"05:25","last":"23:55","note":"q15 weekdays, q30 weekend middays and evenings","cabin":"114","freq":"every 15–30 min","ht":3.8,"ga":"full","cost":7.6,"costNote":"Halbtax day ticket 7.60 (unlimited rides unverified)","verdict":"Cheapest and longest day; 15 laps.","src":"https://braunwald.ch/de/planen-buchen/bergbahnen-sommer/braunwald-standseilbahn/tarife.html"},"Palfriesbahn":{"season":"23 May–15 Nov","first":"08:00","last":"17:30","note":"Lunch break 11:45–13:00; booking recommended","cabin":"8","freq":"every 15 min","ht":15,"ga":"none","cost":105,"costNote":"7 singles at 15, no Halbtax (10-ride card 130)","verdict":"Big 1,250 m laps, but lunch break and 17:30 close.","src":"https://seilbahn-palfries.ch/infos/"},"Älplibahn Malans":{"season":"Mid May–mid Nov","first":"07:00","last":"18:00","note":"Weekends; weekdays 08–17; booking required for every ride","cabin":"8","freq":"every 15 min","ht":14,"ga":"?","cost":98,"costNote":"7 singles at 14 (no Halbtax listed)","verdict":"Phone booking for every ride; 8 big laps.","src":"https://www.aelplibahn.ch/praktische-infos/"},"Telecabina Monte Tamaro":{"season":"1 Apr–8 Nov","first":"08:30","last":"18:00","note":"Jul–Aug; otherwise 17:00","cabin":"8","freq":"gondola","ht":13,"ga":"50%","cost":104,"costNote":"8 singles at 13","verdict":"Gondola, no waits, but closes 18:00.","src":"https://www.montetamaro.ch/en/cable-car"},"Luftseilbahn Beckenried-Klewenalp":{"season":"14 May–1 Nov","first":"08:00","last":"19:15","note":"13 Jun–27 Sep; Fri/Sat to 20:15","cabin":"70","freq":"every 30 min","ht":13.5,"ga":"full","cost":22.5,"costNote":"Hiking day pass 22.50 with Halbtax (ride count unverified); free with GA","verdict":"GA free and big laps, but 11 h window.","src":"https://www.klewenalp.ch/en/informationen/prices"},"Adliswil-Felsenegg":{"season":"All year; summer 11 Apr–24 Oct","first":"08:05","last":"22:05","note":"Sundays to 20:05","cabin":"30","freq":"every 15 min","ht":null,"ga":"full","cost":null,"costNote":"ZVV ticket; free with GA","verdict":"34 min from Zürich, great training hill, 29 laps.","src":"https://www.szu.ch/fahrplanfelseneggbahn"},"Rotenfluebahn (both sections)":{"season":"9 May–25 Oct","first":"08:30","last":"17:30","note":"Two sections, about 15 min ride","cabin":"8","freq":"gondola","ht":14,"ga":"?","cost":126,"costNote":"9 singles at 14","verdict":"No waits, but 9 h window.","src":"https://www.mythenregion.ch/sommer/tickets/rotenfluebahn/"}};
+const SHORT = {"Ragnatsch-Hinterspina":"Private 4-seat lift. Ask the operator about hours.","Mürrenbahn":"Lauterbrunnen–Grütschalp. Big cabin, GA valid.","Braunwaldbahn":"Village funicular, GA valid, closest long-hours option.","Luftseilbahn Schwägalp-Säntis":"Fewest laps. Day hours, pricey.","Aeugstenbahn":"8-seat cabin, steep trail.","Luftseilbahn Brunnen-Urmiberg":"6-seat cabin.","Luftseilbahn Engelberg-Fürenalp":"8-seat cabin, cliff trail.","Stockhornbahn":"Erlenbach–Chrindi section.","Mörel-Greich-Riederalp":"Village access lift, GA valid.","Stoosbahn (Schlattli–Stoos)":"Village funicular, long hours.","Luftseilbahn Wasserauen-Ebenalp":"Queues on sunny weekends.","Luftseilbahn Hoher Kasten":"Queues on sunny weekends.","Uetlibergbahn (S10) Triemli→Uetliberg":"21 min away. Many short laps.","Luftseilbahn Kälti-Stanserhorn (CabriO)":"Long laps. Day hours.","Chur - Känzeli":"45-seat cabin.","Luftseilbahn Kohlplatz–Brüsti":"8-seat cabin."};
+const L = ROWS.map(r => ({name:r[0], type:r[1], occ:r[2], rise:r[3], km:r[4], ride:r[5], wait:r[6], E:r[7], N:r[8], travel:r[9], cls:r[10], ga:r[11], base:r[12]}));
+const clean = n => n.replace(/^Luftseilbahn /,'').replace(/^Funivia /,'').replace(' (2 sections)','').replace(' (CabriO)','').replace(' (S10)','');
+const $ = s => document.querySelector(s);
+const NS = 'http://www.w3.org/2000/svg';
+const el = (tag, attrs, parent, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; parent && parent.appendChild(e); return e; };
+let V = 900, H = 5, sel = 'Mürrenbahn';
+try { const s = JSON.parse(localStorage.getItem('everest-atlas') || '{}'); if (s.V) V = s.V; if (s.H) H = s.H; if (s.sel && L.some(x => x.name === s.sel)) sel = s.sel; } catch {}
+function calc(x){
+  const h = x.km / H * 60, v = x.rise / V * 60;
+  const up = Math.max(h, v) + Math.min(h, v) / 2;
+  const n = Math.ceil(8848 / x.rise), over = x.ride + x.wait + 2;
+  const total = n * up + (n - 1) * over;
+  return {up, n, over, total: total / 60, lift: (total - up) / 60, climbV: n * v / 60, extra: n * (up - v) / 60, liftT: (n - 1) * over / 60};
+}
+const status = h => h <= 10 ? 0 : h <= 17 ? 1 : 2;
+const ST = [{c:'var(--good)', t:'Fits a normal lift day (≤10 h)'}, {c:'var(--warn)', t:'Needs a long-hours lift (≤17 h)'}, {c:'var(--crit)', t:'Longer than any lift runs'}];
+function mark(g, s, x, y, r){ // shape is the second encoding next to colour
+  if (s === 0) return el('circle', {cx:x, cy:y, r, fill:ST[0].c, stroke:'var(--surface)', 'stroke-width':1.5}, g);
+  if (s === 1) return el('rect', {x:x-r*.9, y:y-r*.9, width:r*1.8, height:r*1.8, fill:ST[1].c, stroke:'var(--surface)', 'stroke-width':1.5}, g);
+  return el('path', {d:`M${x} ${y-r*1.15}L${x+r} ${y+r*.75}L${x-r} ${y+r*.75}Z`, fill:ST[2].c, stroke:'var(--surface)', 'stroke-width':1.5}, g);
+}
+const fmtH = h => { const m = Math.round(h * 60); return `${Math.floor(m/60)} h ${String(m%60).padStart(2,'0')}`; };
+const tip = $('#tip');
+function showTip(ev, html){ tip.innerHTML = html; tip.hidden = false; const w = tip.offsetWidth; tip.style.left = Math.min(ev.clientX + 14, innerWidth - w - 12) + 'px'; tip.style.top = (ev.clientY + 14) + 'px'; }
+const hideTip = () => tip.hidden = true;
+const tipHtml = (x, c) => `<b>${clean(x.name)}</b><br>${x.rise} m rise · ${x.km.toFixed(1)} km trail · ${Math.round(x.rise/x.km/10)} %<br>${c.n} laps · ${fmtH(c.total)} total · lift needed ${fmtH(c.lift)}${x.travel ? '<br>' + x.travel + ' min from Zürich' : ''}`;
+
+// legend
+$('#legS').innerHTML = ST.map((s, i) => `<span><svg width="12" height="12" viewBox="-6 -6 12 12" data-s="${i}"></svg>${s.t}</span>`).join('');
+document.querySelectorAll('#legS svg').forEach(s => mark(s, +s.dataset.s, 0, 0, 4.5));
+
+// select
+const shortNames = Object.keys(SHORT).filter(n => L.some(x => x.name === n));
+const lsel = $('#lift');
+lsel.innerHTML = '<optgroup label="Shortlist">' + shortNames.map(n => `<option value="${n}">${clean(n)}</option>`).join('') + '</optgroup><optgroup label="All lifts (A–Z)">' +
+  [...L].sort((a, b) => clean(a.name).localeCompare(clean(b.name))).filter(x => !SHORT[x.name]).map(x => `<option value="${x.name}">${clean(x.name)} · ${x.rise} m</option>`).join('') + '</optgroup>';
+
+function select(n){ sel = n; lsel.value = n; render(); }
+lsel.onchange = () => select(lsel.value);
+$('#vam').oninput = e => { V = +e.target.value; render(); };
+$('#hs').oninput = e => { H = +e.target.value; render(); };
+document.querySelectorAll('#presets button').forEach(b => b.onclick = () => { V = +b.dataset.v; H = +b.dataset.h; render(); });
+
+function drawProfile(x, c){
+  const s = $('#profile'); s.innerHTML = '';
+  const W = 640, Ht = 220, m = {l:46, r:18, t:30, b:26};
+  const T = c.total, lo = 0, hi = x.rise;
+  const sx = t => m.l + t / T * (W - m.l - m.r), sy = z => Ht - m.b - (z - lo) / (hi - lo) * (Ht - m.t - m.b);
+  const defs = el('defs', {}, s);
+  const gr = el('linearGradient', {id:'mtn', x1:0, y1:0, x2:0, y2:1}, defs);
+  el('stop', {offset:0, 'stop-color':'var(--mtn-mid)'}, gr); el('stop', {offset:.55, 'stop-color':'var(--mtn-back)'}, gr); el('stop', {offset:1, 'stop-color':'var(--meadow1)'}, gr);
+  const g = el('g', {}, s);
+  const step = T > 16 ? 4 : 2;
+  for (let t = 0; t <= T; t += step) el('text', {x:sx(t), y:Ht-8, 'text-anchor':'middle', style:'fill:var(--muted)'}, g, t + ' h');
+  [[lo, 'valley'], [hi, '+' + hi + ' m']].forEach(([z, t]) => el('text', {x:m.l-6, y:sy(z)+3.5, 'text-anchor':'end', style:'fill:var(--muted)'}, g, t));
+  el('line', {x1:m.l, x2:W-m.r, y1:sy(lo)+.5, y2:sy(lo)+.5, stroke:'var(--meadow2)', 'stroke-width':3}, g);
+  const f = .24, zs = hi - f * (hi - lo);
+  let t = 0; const cabins = [], trails = [];
+  for (let i = 0; i < c.n; i++) {
+    const last = i === c.n - 1;
+    const t0 = t, t1 = t0 + c.up / 60, t2 = last ? t1 : t1 + (x.wait + 2) / 60, t3 = last ? t1 + .001 : t2 + x.ride / 60;
+    el('path', {d:`M${sx(t0)} ${sy(lo)}L${sx(t1)} ${sy(hi)}L${sx(t2)} ${sy(hi)}L${sx(t3)} ${sy(lo)}Z`, fill:'url(#mtn)'}, g);
+    // snowcap with a wobbly lower edge
+    const xl = sx(t0 + (t1 - t0) * (1 - f)), xr = sx(t2 + (t3 - t2) * f), ys = sy(zs);
+    let d = `M${xl} ${ys}L${sx(t1)} ${sy(hi)}L${sx(t2)} ${sy(hi)}L${xr} ${ys}`;
+    const k = 4; for (let j = 1; j < k; j++) { const xx = xr - (xr - xl) * j / k; d += `L${xx} ${ys + (j % 2 ? 3.5 : -1)}`; }
+    el('path', {d: d + 'Z', fill:'var(--snow)', stroke:'var(--line)', 'stroke-width':.6, 'stroke-linejoin':'round'}, g);
+    trails.push([sx(t0), sy(lo), sx(t1), sy(hi)]);
+    if (!last) cabins.push([sx(t2), sy(hi), sx(t3), sy(lo)]);
+    t = t3;
+  }
+  for (const [a, b, c2, d2] of trails) el('line', {x1:a, y1:b, x2:c2, y2:d2, stroke:'var(--red)', 'stroke-width':2, 'stroke-linecap':'round', 'stroke-dasharray':'0.1 4.5'}, g);
+  for (const [a, b, c2, d2] of cabins) {
+    el('line', {x1:a, y1:b, x2:c2 + 1, y2:d2, stroke:'var(--muted)', 'stroke-width':.8, 'stroke-opacity':.8}, g);
+    const mx = a + (c2 - a) * .45 + 1, my = b + (d2 - b) * .45;
+    const cg = el('g', {transform:`translate(${mx} ${my})`}, g);
+    el('line', {x1:0, y1:-3, x2:0, y2:0, stroke:'var(--muted)', 'stroke-width':1}, cg);
+    el('rect', {x:-4.5, y:0, width:9, height:8, rx:2.2, fill:'var(--red)'}, cg);
+    el('rect', {x:-3, y:1.6, width:6, height:2.8, rx:.9, fill:'#F3F7F6'}, cg);
+  }
+  // hiker on the first slope
+  const [hx0, hy0, hx1, hy1] = trails[0], hp = .38, hx = hx0 + (hx1 - hx0) * hp - 2, hy = hy0 + (hy1 - hy0) * hp - 7;
+  const hk = el('g', {transform:`translate(${hx} ${hy})`, stroke:'var(--ink)', 'stroke-width':1.4, 'stroke-linecap':'round', fill:'none'}, g);
+  el('circle', {cx:0, cy:-6, r:2.1, fill:'var(--ink)', stroke:'none'}, hk);
+  el('path', {d:'M0 -4L-.8 1M-.8 1L-3 5M-.8 1L1.6 4.6M-.3 -2.6L2.6 -.6M2.6 -.6L3.6 5.5'}, hk);
+  el('rect', {x:-3.6, y:-3.8, width:2.6, height:3.6, rx:.8, fill:'var(--sign)', stroke:'none'}, hk);
+  // summit flag
+  const fx = sx(t) - .5, fy = sy(hi);
+  el('line', {x1:fx, y1:fy, x2:fx, y2:fy - 17, stroke:'var(--ink)', 'stroke-width':1.2}, g);
+  el('rect', {x:fx, y:fy - 17, width:10, height:9, rx:1, fill:'var(--red)'}, g);
+  el('path', {d:`M${fx+5} ${fy-15.3}v5.6M${fx+2.2} ${fy-12.5}h5.6`, stroke:'#fff', 'stroke-width':1.6}, g);
+  el('text', {x:fx - 6, y:fy - 9, 'text-anchor':'end', style:'fill:var(--ink);font-family:var(--body);font-weight:600;font-size:12px'}, g, (c.n * x.rise).toLocaleString('de-CH') + ' m');
+}
+
+function drawScatter(calcs){
+  const s = $('#scatter'); s.innerHTML = '';
+  const W = 640, Ht = 380, m = {l:44, r:14, t:14, b:38};
+  const gx = x => x.rise / (x.km * 1000) * 100;
+  const xmax = 40, ymax = 36;
+  const sx = v => m.l + Math.min(v, xmax) / xmax * (W - m.l - m.r), sy = h => Ht - m.b - Math.min(h, ymax) / ymax * (Ht - m.t - m.b);
+  const g = el('g', {}, s);
+  for (let v = 0; v <= xmax; v += 10) { el('line', {x1:sx(v), x2:sx(v), y1:m.t, y2:Ht-m.b, stroke:'var(--grid)'}, g); el('text', {x:sx(v), y:Ht-m.b+16, 'text-anchor':'middle'}, g, v + ' %'); }
+  for (let h = 0; h <= ymax; h += 6) { el('line', {x1:m.l, x2:W-m.r, y1:sy(h), y2:sy(h), stroke:'var(--grid)'}, g); el('text', {x:m.l-6, y:sy(h)+3.5, 'text-anchor':'end'}, g, h + ' h'); }
+  el('text', {x:W-m.r, y:Ht-4, 'text-anchor':'end'}, g, 'average trail grade →');
+  el('text', {x:m.l, y:m.t-3}, g, 'lift hours needed');
+  [[10, 'typical lift day'], [17, 'village access lift']].forEach(([h, t]) => { el('line', {x1:m.l, x2:W-m.r, y1:sy(h), y2:sy(h), stroke:'var(--muted)', 'stroke-dasharray':'4 4'}, g); el('text', {x:W-m.r-4, y:sy(h)-5, 'text-anchor':'end', class:'lbl', style:'fill:var(--muted)'}, g, t + ' ≈ ' + h + ' h'); });
+  const order = calcs.map((c, i) => [c, i]).sort((a, b) => (L[a[1]].name === sel) - (L[b[1]].name === sel));
+  for (const [c, i] of order) {
+    const x = L[i], cx = sx(gx(x)), cy = sy(c.lift), isSel = x.name === sel, isShort = !!SHORT[x.name];
+    const r = isSel ? 7 : isShort ? 5 : 3.5;
+    const mk = mark(g, status(c.lift), cx, cy, r);
+    if (!isShort && !isSel) mk.setAttribute('fill-opacity', .55);
+    if (isSel) el('circle', {cx, cy, r:12, fill:'none', stroke:'var(--ink)', 'stroke-width':1.5}, g);
+    const hit = el('circle', {cx, cy, r:9, fill:'transparent', style:'cursor:pointer'}, g);
+    hit.onmousemove = ev => showTip(ev, tipHtml(x, c)); hit.onmouseleave = hideTip; hit.onclick = () => select(x.name);
+    if (isSel) el('text', {x:cx + 15, y:cy + 4, class:'lbl'}, g, clean(x.name));
+  }
+}
+
+function drawDist(calcs){
+  const s = $('#dist'); s.innerHTML = '';
+  const W = 640, Ht = 380, m = {l:44, r:14, t:14, b:38}, xmax = 240, y0 = 10, y1 = 28;
+  const sx = v => m.l + v / xmax * (W - m.l - m.r), sy = h => Ht - m.b - (h - y0) / (y1 - y0) * (Ht - m.t - m.b);
+  const g = el('g', {}, s);
+  for (let v = 0; v <= xmax; v += 60) { el('line', {x1:sx(v), x2:sx(v), y1:m.t, y2:Ht-m.b, stroke:'var(--grid)'}, g); el('text', {x:sx(v), y:Ht-m.b+16, 'text-anchor':'middle'}, g, v / 60 + ' h'); }
+  for (let h = y0; h <= y1; h += 3) { el('line', {x1:m.l, x2:W-m.r, y1:sy(h), y2:sy(h), stroke:'var(--grid)'}, g); el('text', {x:m.l-6, y:sy(h)+3.5, 'text-anchor':'end'}, g, h + ' h'); }
+  el('text', {x:W-m.r, y:Ht-4, 'text-anchor':'end'}, g, 'travel from Zürich HB →');
+  el('text', {x:m.l, y:m.t-3}, g, 'lift hours needed');
+  const pts = L.map((x, i) => ({x, c: calcs[i]})).filter(p => p.x.travel != null && p.x.travel <= xmax && p.c.lift <= y1);
+  // Pareto front: nothing else is both closer and quicker
+  const front = []; let best = Infinity;
+  [...pts].sort((a, b) => a.x.travel - b.x.travel || a.c.lift - b.c.lift).forEach(p => { if (p.c.lift < best) { best = p.c.lift; front.push(p); } });
+  let d = ''; front.forEach((p, i) => { const X = sx(p.x.travel), Y = sy(p.c.lift); d += i ? `H${X}V${Y}` : `M${X} ${Y}`; });
+  el('path', {d, fill:'none', stroke:'var(--ink)', 'stroke-width':1.5, 'stroke-dasharray':'5 4', 'stroke-opacity':.7}, g);
+  const onFront = new Set(front.map(p => p.x.name));
+  for (const p of [...pts].sort((a, b) => (a.x.name === sel) - (b.x.name === sel))) {
+    const cx = sx(p.x.travel), cy = sy(p.c.lift), isSel = p.x.name === sel, key = onFront.has(p.x.name) || !!SHORT[p.x.name];
+    const mk = mark(g, status(p.c.lift), cx, cy, isSel ? 7 : key ? 5 : 3.5);
+    if (!key && !isSel) mk.setAttribute('fill-opacity', .5);
+    if (isSel) el('circle', {cx, cy, r:12, fill:'none', stroke:'var(--ink)', 'stroke-width':1.5}, g);
+    const hit = el('circle', {cx, cy, r:9, fill:'transparent', style:'cursor:pointer'}, g);
+    const door = 2 * p.x.travel / 60 + p.c.total;
+    hit.onmousemove = ev => showTip(ev, tipHtml(p.x, p.c) + `<br>Door to door: ${fmtH(door)}`); hit.onmouseleave = hideTip; hit.onclick = () => select(p.x.name);
+  }
+  let lastY = -99;
+  front.forEach(p => { const cx = sx(p.x.travel), cy = sy(p.c.lift); if (Math.abs(cy - lastY) < 13) return; lastY = cy;
+    el('text', {x:cx + 9, y:cy - 7, class:'lbl'}, g, clean(p.x.name).slice(0, 22)); });
+}
+
+function drawMap(calcs){
+  const s = $('#map'); s.innerHTML = '';
+  const px = E => (E - 2480) * 1.0, py = N => (1300 - N) * 1.0;
+  el('path', {d: 'M' + BORDER.map(([E, N]) => px(E).toFixed(1) + ' ' + py(N).toFixed(1)).join('L') + 'Z', fill:'var(--grid)', stroke:'var(--line)', 'stroke-width':1}, s);
+  const g = el('g', {}, s);
+  const idx = L.map((x, i) => i).sort((a, b) => (L[a].name === sel) - (L[b].name === sel) || (!!SHORT[L[a].name]) - (!!SHORT[L[b].name]));
+  for (const i of idx) {
+    const x = L[i], c = calcs[i], isSel = x.name === sel, isShort = !!SHORT[x.name];
+    const mk = mark(g, status(c.lift), px(x.E), py(x.N), isSel ? 6 : isShort ? 4 : 2.6);
+    if (!isShort && !isSel) mk.setAttribute('fill-opacity', .5);
+    const hit = el('circle', {cx:px(x.E), cy:py(x.N), r:7, fill:'transparent', style:'cursor:pointer'}, g);
+    hit.onmousemove = ev => showTip(ev, tipHtml(x, c)); hit.onmouseleave = hideTip; hit.onclick = () => select(x.name);
+  }
+  const zx = px(2683.2), zy = py(1247.9);
+  el('path', {d:`M${zx} ${zy-6}L${zx+5.5} ${zy}L${zx} ${zy+6}L${zx-5.5} ${zy}Z`, fill:'var(--ink)'}, s);
+  el('text', {x:zx + 8, y:zy + 4, class:'lbl'}, s, 'Zürich');
+  const xs = L.find(x => x.name === sel); if (xs) { el('circle', {cx:px(xs.E), cy:py(xs.N), r:10, fill:'none', stroke:'var(--ink)', 'stroke-width':1.5}, s); }
+}
+
+function drawBars(list){
+  const s = $('#bars'); s.innerHTML = '';
+  const W = 560, m = {l:150, r:40, t:6, b:22}, rowH = 26, Ht = m.t + m.b + list.length * rowH;
+  s.setAttribute('viewBox', `0 0 ${W} ${Ht}`);
+  const max = Math.ceil(Math.max(...list.map(d => d.c.total)) / 4) * 4;
+  const sx = h => m.l + h / max * (W - m.l - m.r);
+  const g = el('g', {}, s);
+  for (let h = 0; h <= max; h += 4) { el('line', {x1:sx(h), x2:sx(h), y1:m.t, y2:Ht-m.b, stroke:'var(--grid)'}, g); el('text', {x:sx(h), y:Ht-6, 'text-anchor':'middle'}, g, h + ' h'); }
+  list.forEach((d, i) => {
+    const y = m.t + i * rowH + 5, bh = rowH - 10, isSel = d.x.name === sel;
+    el('text', {x:m.l - 8, y:y + bh/2 + 4, 'text-anchor':'end', class:'lbl', style:isSel ? 'font-weight:700' : ''}, g, clean(d.x.name).slice(0, 24));
+    let acc = 0;
+    [[d.c.climbV, 'var(--s1)', 'Climbing'], [d.c.extra, 'var(--s2)', 'Trail distance'], [d.c.liftT, 'var(--s3)', 'Lift wait + ride']].forEach(([v, col, lab], k) => {
+      const x0 = sx(acc), w = Math.max(0, sx(acc + v) - x0 - (k < 2 ? 2 : 0));
+      const r = el('rect', {x:x0, y, width:w, height:bh, fill:col, rx: k === 2 ? 3 : 0}, g);
+      r.onmousemove = ev => showTip(ev, `<b>${clean(d.x.name)}</b><br>${lab}: ${fmtH(v)}<br>${d.c.n} laps of ${d.x.rise} m`); r.onmouseleave = hideTip;
+      r.style.cursor = 'pointer'; r.onclick = () => select(d.x.name);
+      acc += v;
+    });
+    el('text', {x:sx(acc) + 5, y:y + bh/2 + 4}, g, d.c.total.toFixed(1));
+  });
+}
+
+function vtip(d){ const v = d.v; return `<b>${clean(d.x.name)}</b><br>${v.season || 'season ?'}<br>${v.first ? v.first + '–' + v.last : 'hours unknown'}${v.note ? ' · ' + v.note : ''}<br>Cabin ${v.cabin || '?'} · ${v.freq || '?'}<br>${d.c.n} laps, lift needed ${fmtH(d.c.lift)}${v.verdict ? '<br><i>' + v.verdict + '</i>' : ''}`; }
+function drawGantt(top){
+  const s = $('#gantt'); s.innerHTML = '';
+  const W = 640, m = {l:150, r:64, t:18, b:24}, rowH = 25, Ht = m.t + m.b + top.length * rowH, x0 = 4, x1 = 25;
+  s.setAttribute('viewBox', `0 0 ${W} ${Ht}`);
+  const sx = h => m.l + (Math.max(x0, Math.min(x1, h)) - x0) / (x1 - x0) * (W - m.l - m.r);
+  const g = el('g', {}, s);
+  for (let h = 4; h <= 24; h += 4) { el('line', {x1:sx(h), x2:sx(h), y1:m.t - 4, y2:Ht - m.b, stroke:'var(--grid)'}, g); el('text', {x:sx(h), y:Ht - 6, 'text-anchor':'middle'}, g, String(h).padStart(2, '0') + ':00'); }
+  top.forEach((d, i) => {
+    const y = m.t + i * rowH + rowH / 2, isSel = d.x.name === sel;
+    const row = el('g', {style:'cursor:pointer'}, g);
+    el('rect', {x:0, y:y - rowH / 2, width:W, height:rowH, fill:'transparent'}, row);
+    el('text', {x:m.l - 8, y:y + 4, 'text-anchor':'end', class:'lbl', style:isSel ? 'font-weight:700' : ''}, row, clean(d.x.name).slice(0, 23));
+    if (d.win == null) { el('text', {x:sx(5), y:y + 4, style:'font-style:italic'}, row, d.v.nosummer ? 'no summer service' : 'hours not published'); }
+    else {
+      el('rect', {x:sx(d.f), y:y - 7, width:sx(d.l) - sx(d.f), height:14, rx:3, fill:'var(--grid)', stroke:'var(--line)'}, row);
+      el('line', {x1:sx(d.f - d.c.up / 60), x2:sx(d.f), y1:y, y2:y, stroke:'var(--muted)', 'stroke-dasharray':'2 2'}, row);
+      const end = d.f + d.c.lift;
+      el('rect', {x:sx(d.f), y:y - 2.5, width:Math.max(2, sx(Math.min(end, d.l)) - sx(d.f)), height:5, rx:2.5, fill:'var(--s1)'}, row);
+      if (end > d.l) el('rect', {x:sx(d.l) + 1, y:y - 2.5, width:Math.max(2, sx(end) - sx(d.l) - 1), height:5, rx:2.5, fill:'var(--crit)'}, row);
+      el('text', {x:W - m.r + 6, y:y + 4, style:d.gap <= 0 ? 'fill:var(--good);font-weight:600' : ''}, row, d.gap <= 0 ? 'fits' : '−' + d.gap.toFixed(1) + ' h');
+    }
+    if (isSel) el('rect', {x:2, y:y - rowH / 2 + 2, width:3, height:rowH - 4, fill:'var(--sign)'}, row);
+    row.onmousemove = ev => showTip(ev, vtip(d)); row.onmouseleave = hideTip; row.onclick = () => select(d.x.name);
+  });
+}
+const winOf = x => { const v = VER[x.name]; if (!v) return null; const t = s => { const mm = /^(\d{1,2}):(\d{2})$/.exec(s || ''); return mm ? +mm[1] + mm[2] / 60 : null; }; const f = t(v.first), l = t(v.last); return f != null && l != null ? l - f : null; };
+const VARS = {
+  laps: {label:'Laps', f:(x, c) => c.n},
+  rise: {label:'Climb per lap (m)', f:x => x.rise},
+  grade: {label:'Trail grade (%)', f:x => x.rise / x.km / 10},
+  travel: {label:'Travel from Zürich (min)', f:x => x.travel},
+  lift: {label:'Lift hours needed', f:(x, c) => c.lift},
+  total: {label:'Hiking time incl. lifts (h)', f:(x, c) => c.total},
+  door: {label:'Door-to-door day (h)', f:(x, c) => x.travel != null ? c.total + 2 * x.travel / 60 : null},
+  window: {label:'Lift opening window (h)', f:x => winOf(x)},
+  cost: {label:'Lift cost per attempt (CHF)', f:x => VER[x.name] ? VER[x.name].cost ?? (VER[x.name].ga === 'full' ? 0 : null) : null}};
+function nice(lo, hi, n = 5){ const span = hi - lo || 1, raw = span / n, p = Math.pow(10, Math.floor(Math.log10(raw))), st = [1, 2, 2.5, 5, 10].map(k => k * p).find(k => k >= raw);
+  const a = Math.floor(lo / st) * st, b = Math.ceil(hi / st) * st; const t = []; for (let v = a; v <= b + st / 2; v += st) t.push(+v.toFixed(6)); return {a, b, t}; }
+function drawAwards(calcs){
+  const pool = L.map((x, i) => ({x, c: calcs[i], v: VER[x.name] || {}})).filter(p => TOP.includes(p.x.name) && !p.v.nosummer);
+  pool.forEach(p => { p.win = winOf(p.x); p.gap = p.win != null ? p.c.lift - p.win : null; p.cost = VARS.cost.f(p.x, p.c); p.door = p.x.travel != null ? p.c.total + 2 * p.x.travel / 60 : null; });
+  const fits = pool.filter(p => p.gap != null && p.gap <= 0);
+  const minBy = (arr, f) => arr.filter(p => f(p) != null).sort((a, b) => f(a) - f(b))[0];
+  const cats = [
+    ['Best overall', fits.length ? minBy(fits, p => p.door) : minBy(pool.filter(p => p.gap != null), p => p.gap), p => p.gap <= 0 ? `fits, ${fmtH(p.door)} door to door` : `closest: ${p.gap.toFixed(1)} h short`],
+    ['Most spare time', minBy(pool, p => p.gap), p => p.gap <= 0 ? `${(-p.gap).toFixed(1)} h before closing` : `${p.gap.toFixed(1)} h short`],
+    ['Closest to Zürich', minBy(fits.length ? fits : pool, p => p.x.travel), p => `${p.x.travel} min${p.gap != null && p.gap <= 0 ? ', fits' : ''}`],
+    ['Cheapest attempt', minBy(pool, p => p.cost == null ? null : p.cost * 100 + (p.gap ?? 50)), p => p.cost === 0 ? 'free with day GA' : `CHF ${Math.round(p.cost)}${p.v.ga === 'full' ? ', or free with day GA' : ''}`],
+    ['Fewest laps', minBy(pool.filter(p => p.win != null), p => p.c.n * 10000 + p.c.lift), p => `${p.c.n} laps of ${p.x.rise} m`],
+    ['Steepest trail', minBy(pool, p => -p.x.rise / p.x.km), p => `${Math.round(p.x.rise / p.x.km / 10)} % average`],
+    ['Short-lap fans', minBy(pool.filter(p => p.gap != null && p.c.n >= 14), p => p.gap), p => `${p.c.n} laps, ${p.gap <= 0 ? 'fits' : p.gap.toFixed(1) + ' h short'}`],
+    ['Longest lift day', minBy(pool, p => p.win == null ? null : -p.win), p => `${p.v.first}–${p.v.last}`]];
+  $('#awPace').textContent = `at ${V} m/h, ${H} km/h`;
+  $('#awards').innerHTML = cats.filter(c => c[1]).map(([cat, p, why]) => `<button type="button" class="award" data-n="${p.x.name}" aria-pressed="${p.x.name === sel}"><span class="cat">${cat}</span><span class="who">${clean(p.x.name)}</span><span class="why">${why(p)}</span></button>`).join('');
+  document.querySelectorAll('.award').forEach(b => b.onclick = () => select(b.dataset.n));
+}
+const SEASON = {"Mörel-Greich-Riederalp":{"all":1,"s":"06-06","e":"10-25"},"Luftseilbahn Schwägalp-Säntis":{"s":"05-29","e":"10-24"},"Mürrenbahn":{"all":1,"s":"05-03","e":"10-26"},"Luftseilbahn Sörenberg-Brienzer Rothorn":{"s":"06-04","e":"11-01"},"Stockhornbahn":{"s":"04-11","e":"11-22"},"Luftseilbahn Golzern":{"all":1,"s":"06-01","e":"09-30"},"Luftseilbahn Lungern-Turren":{"s":"05-14","e":"11-01"},"Chur - Känzeli":{"s":"06-05","e":"10-25"},"Aeugstenbahn":{"s":"05-01","e":"10-31"},"Luftseilbahn Engelberg-Fürenalp":{"all":1,"s":"07-01","e":"09-30"},"Luftseilbahn Brunnen-Urmiberg":{"s":"04-01","e":"11-15"},"Harderbahn":{"s":"04-03","e":"11-29"},"Luftseilbahn Kandersteg-Allmenalp":{"s":"05-06","e":"10-25"},"Luftseilbahn Kohlplatz–Brüsti":{"all":1,"s":"06-01","e":"09-30"},"Luftseilbahn Staldenried - Gspon":{"all":1,"s":"05-09","e":"10-25"},"Schwandibahn":{"s":"05-02","e":"11-15","note":"weekends only"},"Milchseilbahn":{"s":"05-15","e":"10-25"},"Braunwaldbahn":{"all":1,"s":"01-01","e":"12-31"},"Palfriesbahn":{"s":"05-23","e":"11-15"},"Älplibahn Malans":{"s":"05-15","e":"11-14"},"Telecabina Monte Tamaro":{"all":1,"s":"04-01","e":"11-08"},"Luftseilbahn Beckenried-Klewenalp":{"o":["05-14","11-01"],"s":"06-13","e":"09-27"},"Adliswil-Felsenegg":{"all":1,"s":"04-11","e":"10-24"},"Rotenfluebahn (both sections)":{"s":"05-09","e":"10-25"}};
+function liftAt(x, V2){ const h = x.km / H * 60, v = x.rise / V2 * 60, up = Math.max(h, v) + Math.min(h, v) / 2, n = Math.ceil(8848 / x.rise); return (n * up + (n - 1) * (x.ride + x.wait + 2) - up) / 60; }
+function minPace(x, win){ if (win == null) return null; let lo = 200, hi = 3000; if (liftAt(x, hi) > win) return Infinity;
+  for (let i = 0; i < 40; i++) { const mid = (lo + hi) / 2; if (liftAt(x, mid) <= win) hi = mid; else lo = mid; } return hi; }
+function rowLabel(row, x, y, name, isSel){ el('text', {x, y, 'text-anchor':'end', class:'lbl', style:isSel ? 'font-weight:700' : ''}, row, clean(name).slice(0, 23)); }
+function drawMinPace(top){
+  const s = $('#minpace'); s.innerHTML = '';
+  const rows = top.filter(d => d.win != null).map(d => ({...d, mp: minPace(d.x, d.win)})).sort((a, b) => a.mp - b.mp);
+  const W = 640, m = {l:150, r:70, t:30, b:26}, rowH = 25, Ht = m.t + m.b + rows.length * rowH, x0 = 400, x1 = 1800;
+  s.setAttribute('viewBox', `0 0 ${W} ${Ht}`);
+  const sx = v => m.l + (Math.min(Math.max(v, x0), x1) - x0) / (x1 - x0) * (W - m.l - m.r);
+  const g = el('g', {}, s);
+  for (let v = 400; v <= 1800; v += 200) { el('line', {x1:sx(v), x2:sx(v), y1:m.t - 6, y2:Ht - m.b, stroke:'var(--grid)'}, g); el('text', {x:sx(v), y:Ht - 6, 'text-anchor':'middle'}, g, v); }
+  el('text', {x:W - m.r, y:Ht - 6, 'text-anchor':'start', dx:6}, g, 'm/h');
+  [[600, 'average hiker'], [1200, 'VK racer']].forEach(([v, t]) => el('text', {x:sx(v), y:m.t - 12, 'text-anchor':'middle', style:'font-size:9.5px'}, g, t));
+  rows.forEach((d, i) => {
+    const y = m.t + i * rowH + rowH / 2, isSel = d.x.name === sel, ok = d.mp <= V, row = el('g', {style:'cursor:pointer'}, g);
+    el('rect', {x:0, y:y - rowH / 2, width:W, height:rowH, fill:'transparent'}, row);
+    rowLabel(row, m.l - 8, y + 4, d.x.name, isSel);
+    const xe = sx(d.mp);
+    el('line', {x1:sx(x0), x2:xe, y1:y, y2:y, stroke:ok ? 'var(--good)' : 'var(--crit)', 'stroke-width':2, 'stroke-opacity':.45}, row);
+    mark(row, ok ? 0 : 2, xe, y, isSel ? 6.5 : 5);
+    el('text', {x:W - m.r + 6, y:y + 4}, row, isFinite(d.mp) ? Math.round(d.mp / 10) * 10 + '' : 'never');
+    if (isSel) el('rect', {x:2, y:y - rowH / 2 + 2, width:3, height:rowH - 4, fill:'var(--sign)'}, row);
+    row.onmousemove = ev => showTip(ev, `<b>${clean(d.x.name)}</b><br>Window ${d.v.first}–${d.v.last} (${d.win.toFixed(1)} h)<br>Needs at least ${isFinite(d.mp) ? Math.round(d.mp) + ' m/h' : 'more than any pace at this trail speed'}<br>${d.c.n} laps of ${d.x.rise} m`);
+    row.onmouseleave = hideTip; row.onclick = () => select(d.x.name);
+  });
+  el('line', {x1:sx(V), x2:sx(V), y1:m.t - 4, y2:Ht - m.b, stroke:'var(--red)', 'stroke-width':2}, g);
+  el('text', {x:sx(V) + 4, y:m.t + 6, class:'lbl', style:'fill:var(--red);font-weight:700'}, g, 'you ' + V);
+}
+function drawSeason(top){
+  const s = $('#season'); s.innerHTML = '';
+  const doy = md => { const [mm, dd] = md.split('-').map(Number); return (new Date(2027, mm - 1, dd) - new Date(2027, 0, 1)) / 864e5; };
+  const rows = top.filter(d => SEASON[d.x.name]).map(d => ({...d, se: SEASON[d.x.name]})).sort((a, b) => doy(a.se.s) - doy(b.se.s) || doy(b.se.e) - doy(a.se.e));
+  const W = 640, m = {l:150, r:16, t:30, b:26}, rowH = 22, Ht = m.t + m.b + rows.length * rowH;
+  s.setAttribute('viewBox', `0 0 ${W} ${Ht}`);
+  const sx = d => m.l + d / 365 * (W - m.l - m.r);
+  const g = el('g', {}, s);
+  el('rect', {x:sx(doy('06-01')), y:m.t - 8, width:sx(doy('07-31')) - sx(doy('06-01')), height:Ht - m.b - m.t + 8, fill:'var(--sign)', 'fill-opacity':.16}, g);
+  el('text', {x:(sx(doy('06-01')) + sx(doy('07-31'))) / 2, y:m.t - 14, 'text-anchor':'middle', style:'font-size:9.5px'}, g, 'longest days');
+  'JFMAMJJASOND'.split('').forEach((c, k) => { const d = doy(String(k + 1).padStart(2, '0') + '-01'); el('line', {x1:sx(d), x2:sx(d), y1:m.t - 4, y2:Ht - m.b, stroke:'var(--grid)'}, g); el('text', {x:sx(d) + (sx(30) - sx(0)) / 2, y:Ht - 6, 'text-anchor':'middle'}, g, c); });
+  rows.forEach((d, i) => {
+    const y = m.t + i * rowH + rowH / 2, isSel = d.x.name === sel, row = el('g', {style:'cursor:pointer'}, g);
+    el('rect', {x:0, y:y - rowH / 2, width:W, height:rowH, fill:'transparent'}, row);
+    rowLabel(row, m.l - 8, y + 4, d.x.name, isSel);
+    const o = d.se.all ? ['01-01', '12-31'] : d.se.o;
+    if (o) el('rect', {x:sx(doy(o[0])), y:y - 5, width:sx(doy(o[1])) - sx(doy(o[0])), height:10, rx:5, fill:'var(--s1)', 'fill-opacity':.18}, row);
+    el('rect', {x:sx(doy(d.se.s)), y:y - 5, width:Math.max(4, sx(doy(d.se.e)) - sx(doy(d.se.s))), height:10, rx:5, fill:'var(--s1)'}, row);
+    if (isSel) el('rect', {x:2, y:y - rowH / 2 + 2, width:3, height:rowH - 4, fill:'var(--sign)'}, row);
+    row.onmousemove = ev => showTip(ev, `<b>${clean(d.x.name)}</b><br>${d.v.season || ''}${d.se.note ? '<br>' + d.se.note : ''}<br>Hours used here: ${d.v.first}–${d.v.last}`); row.onmouseleave = hideTip; row.onclick = () => select(d.x.name);
+  });
+}
+function drawCostTravel(top){
+  const s = $('#costtr'); s.innerHTML = '';
+  const pts = top.filter(d => d.x.travel != null && (d.v.cost != null || d.v.ga === 'full')).map(d => ({...d, cost: d.v.cost ?? 0}));
+  const W = 640, Ht = 560, m = {l:52, r:20, t:20, b:40}, xmax = 180, ymax = Math.ceil(Math.max(...pts.map(p => p.cost)) / 50) * 50;
+  const sx = v => m.l + v / xmax * (W - m.l - m.r), sy = v => Ht - m.b - v / ymax * (Ht - m.t - m.b);
+  const g = el('g', {}, s);
+  for (let v = 0; v <= xmax; v += 30) { el('line', {x1:sx(v), x2:sx(v), y1:m.t, y2:Ht - m.b, stroke:'var(--grid)'}, g); el('text', {x:sx(v), y:Ht - m.b + 16, 'text-anchor':'middle'}, g, v); }
+  for (let v = 0; v <= ymax; v += 50) { el('line', {x1:m.l, x2:W - m.r, y1:sy(v), y2:sy(v), stroke:'var(--grid)'}, g); el('text', {x:m.l - 6, y:sy(v) + 3.5, 'text-anchor':'end'}, g, v); }
+  el('text', {x:W - m.r, y:Ht - 6, 'text-anchor':'end'}, g, 'minutes from Zürich HB →');
+  el('text', {x:m.l, y:m.t - 6}, g, '↑ CHF per attempt (Halbtax)');
+  el('line', {x1:m.l, x2:W - m.r, y1:sy(29), y2:sy(29), stroke:'var(--good)', 'stroke-dasharray':'4 3'}, g);
+  el('text', {x:W - m.r - 4, y:sy(29) - 5, 'text-anchor':'end', class:'lbl', style:'fill:var(--good);font-size:10px'}, g, 'day GA from CHF 29');
+  const placed = [];
+  pts.sort((a, b) => (a.x.name === sel) - (b.x.name === sel)).forEach(p => {
+    const cx = sx(p.x.travel), cy = sy(p.cost), isSel = p.x.name === sel;
+    const st = p.gap != null ? (p.gap <= 0 ? 0 : p.gap <= 3 ? 1 : 2) : status(p.c.lift);
+    if (p.v.ga === 'full') el('circle', {cx, cy, r:isSel ? 11 : 9, fill:'none', stroke:'var(--good)', 'stroke-width':2}, g);
+    mark(g, st, cx, cy, isSel ? 6.5 : 5);
+    if (!placed.some(([px, py]) => Math.abs(px - cx) < 80 && Math.abs(py - cy) < 12)) { placed.push([cx, cy]); el('text', {x:cx + 11, y:cy + 4, class:'lbl', style:'font-size:10.5px' + (isSel ? ';font-weight:700' : '')}, g, clean(p.x.name).slice(0, 20)); }
+    const hit = el('circle', {cx, cy, r:10, fill:'transparent', style:'cursor:pointer'}, g);
+    hit.onmousemove = ev => showTip(ev, `<b>${clean(p.x.name)}</b><br>${p.x.travel} min from Zürich<br>${p.v.cost != null ? 'CHF ' + Math.round(p.v.cost) + ' with Halbtax' : 'fare not found'}${p.v.ga === 'full' ? '<br>Free with a day GA' : ''}<br>${p.v.costNote || ''}`); hit.onmouseleave = hideTip; hit.onclick = () => select(p.x.name);
+  });
+}
+function render(){
+  $('#vam').value = V; $('#hs').value = H;
+  $('#vamO').textContent = V + ' m/h'; $('#hsO').textContent = H + ' km/h';
+  document.querySelectorAll('#presets button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.v === V && +b.dataset.h === H));
+  try { localStorage.setItem('everest-atlas', JSON.stringify({V, H, sel})); } catch {}
+  const calcs = L.map(calc);
+  const x = L.find(l => l.name === sel), c = calc(x);
+  lsel.value = sel;
+  $('#pName').textContent = clean(x.name);
+  $('#pSub').textContent = `${c.n} laps × ${x.rise} m · ${x.km.toFixed(1)} km trail each`;
+  const st = status(c.lift);
+  $('#stats').innerHTML = [
+    ['Laps', c.n, ''], ['Climb per lap', x.rise, 'm'], ['Trail grade', Math.round(x.rise / x.km / 10), '%'],
+    ['Total time', fmtH(c.total), ''], ['Lift hours needed', fmtH(c.lift), ''], ['From Zürich', x.travel ?? '—', x.travel ? 'min' : '']]
+    .map(([k, v, u], i) => `<div class="stat"><div class="k">${k}</div><div class="v">${i === 4 ? `<svg width="14" height="14" viewBox="-7 -7 14 14" style="margin-right:.35em" data-st="${st}"></svg>` : ''}${v}<small>${u}</small></div></div>`).join('');
+  const sv = document.querySelector('[data-st]'); mark(sv, st, 0, 0, 5);
+  drawProfile(x, c); drawScatter(calcs); drawDist(calcs); drawMap(calcs); drawAwards(calcs);
+  const list = shortNames.map(n => { const xx = L.find(l => l.name === n); return {x: xx, c: calc(xx)}; }).sort((a, b) => a.c.lift - b.c.lift);
+  drawBars(list.slice(0, 12));
+  const top = TOP.filter(n => L.some(l => l.name === n)).map(n => { const xx = L.find(l => l.name === n); return {x: xx, c: calc(xx), v: VER[n] || {}}; });
+  const toH = s => { const mm = /^(\d{1,2}):(\d{2})$/.exec(s || ''); return mm ? +mm[1] + mm[2] / 60 : null; };
+  top.forEach(d => { d.f = toH(d.v.first); d.l = toH(d.v.last); d.win = d.f != null && d.l != null ? d.l - d.f : null; d.gap = d.win != null ? d.c.lift - d.win : null; });
+  top.sort((a, b) => (a.gap ?? 99) - (b.gap ?? 99));
+  const nv = top.filter(d => d.win != null).length;
+  $('#tcap').textContent = `Summer timetables (2026, the best guide to summer 2027) from operator sites, checked for ${nv} of ${top.length} lifts. Your lift time starts at the first ride and grows with your pace. Anything in red runs past closing.`;
+  drawGantt(top); drawMinPace(top); drawSeason(top); drawCostTravel(top);
+}
+function drawScene(){
+  const s = $('#scene'); if (!s) return; s.innerHTML = '';
+  const defs = el('defs', {}, s), sk = el('linearGradient', {id:'sky', x1:0, y1:0, x2:0, y2:1}, defs);
+  el('stop', {offset:0, 'stop-color':'var(--sky1)'}, sk); el('stop', {offset:1, 'stop-color':'var(--sky2)'}, sk);
+  el('rect', {y:-140, width:1200, height:560, fill:'url(#sky)'}, s);
+  // stars (dark) and sun or moon
+  const st = el('g', {style:'opacity:var(--stars)'}, s);
+  [[620,40],[700,90],[760,30],[840,70],[980,40],[1040,110],[1150,60],[560,110],[900,120],[1110,20],[660,150],[480,60]].forEach(([x, y], i) => el('circle', {cx:x, cy:y, r:i % 3 ? 1.2 : 1.8, fill:'#fff'}, st));
+  el('circle', {cx:1060, cy:78, r:30, fill:'var(--sun)'}, s);
+  const cl = el('g', {style:'opacity:var(--cloud)', fill:'#fff'}, s);
+  [[700,95,1],[880,140,.8]].forEach(([x, y, k]) => { [[0,0,18],[20,-8,22],[44,0,17],[22,6,16]].forEach(([dx, dy, r]) => el('circle', {cx:x + dx * k, cy:y + dy * k, r:r * k}, cl)); });
+  // ranges: [x, y] ridge points, snow on peaks above snowY
+  const range = (pts, fill, snowY) => {
+    el('path', {d:'M' + pts.map(p => p.join(' ')).join('L') + 'L1200 420L' + pts[0][0] + ' 420Z', fill}, s);
+    pts.forEach((p, i) => { if (!i || i === pts.length - 1 || p[1] > snowY) return; const a = pts[i - 1], b = pts[i + 1]; if (p[1] > a[1] || p[1] > b[1]) return;
+      const f = Math.min(.42, (snowY - p[1]) / Math.max(a[1] - p[1], b[1] - p[1]) );
+      const L1 = [p[0] + (a[0] - p[0]) * f, p[1] + (a[1] - p[1]) * f], R1 = [p[0] + (b[0] - p[0]) * f, p[1] + (b[1] - p[1]) * f];
+      const zig = [[R1[0] - (R1[0] - p[0]) * .3, R1[1] - 6], [p[0] + (R1[0] - p[0]) * .15, R1[1] + 4], [p[0] - (p[0] - L1[0]) * .35, L1[1] - 7]];
+      el('path', {d:`M${L1}L${p}L${R1}L${zig.map(z => z.join(' ')).join('L')}Z`, fill:'var(--snow)'}, s); });
+  };
+  range([[300,330],[420,250],[480,280],[560,170],[620,215],[700,120],[760,190],[830,150],[885,215],[930,52],[945,62],[1010,200],[1070,160],[1130,210],[1200,170]], 'var(--mtn-back)', 230);
+  range([[360,360],[470,300],[540,320],[640,240],[720,300],[800,250],[880,310],[980,260],[1080,320],[1200,280]], 'var(--mtn-mid)', 275);
+  // meadows
+  el('path', {d:'M0 330C160 290 330 300 520 335S880 360 1200 320L1200 420L0 420Z', fill:'var(--meadow1)'}, s);
+  el('path', {d:'M0 370C220 340 420 350 640 372S1000 392 1200 360L1200 420L0 420Z', fill:'var(--meadow2)'}, s);
+  // firs
+  [[470,335,1],[505,340,.8],[1020,352,1.1],[1060,356,.85],[1110,348,1],[60,352,.9]].forEach(([x, y, k]) => { const g = el('g', {transform:`translate(${x} ${y}) scale(${k})`}, s);
+    el('path', {d:'M0 -34L11 -12H5L14 4H-14L-5 -12H-11Z', fill:'var(--fir)'}, g); el('rect', {x:-2, y:4, width:4, height:6, fill:'var(--wood)'}, g); });
+  // cable car from meadow to a mid peak
+  const p0 = [330, 318], p1 = [640, 242];
+  el('path', {d:`M${p0[0]} ${p0[1]}L${p0[0]} ${p0[1] - 30}`, stroke:'var(--muted)', 'stroke-width':3}, s);
+  el('line', {x1:p0[0], y1:p0[1] - 30, x2:p1[0], y2:p1[1] - 6, stroke:'var(--ink)', 'stroke-width':1.2, 'stroke-opacity':.55}, s);
+  const ct = .38, cx = p0[0] + (p1[0] - p0[0]) * ct, cy = (p0[1] - 30) + ((p1[1] - 6) - (p0[1] - 30)) * ct;
+  el('line', {x1:cx, y1:cy, x2:cx, y2:cy + 7, stroke:'var(--ink)', 'stroke-width':1.4}, s);
+  el('rect', {x:cx - 11, y:cy + 7, width:22, height:16, rx:4, fill:'var(--red)'}, s);
+  el('rect', {x:cx - 8, y:cy + 10, width:16, height:6, rx:1.5, fill:'#fff', 'fill-opacity':.92}, s);
+  // chalet with flag
+  const ch = el('g', {transform:'translate(205 300)'}, s);
+  el('rect', {x:-26, y:0, width:52, height:34, fill:'var(--wood)'}, ch);
+  el('path', {d:'M-34 2L0 -24L34 2Z', fill:'var(--roof)'}, ch);
+  el('rect', {x:-18, y:9, width:11, height:10, fill:'#FFE7A3'}, ch); el('rect', {x:7, y:9, width:11, height:10, fill:'#FFE7A3'}, ch);
+  el('rect', {x:-21, y:9, width:3, height:10, fill:'var(--red)'}, ch); el('rect', {x:-7, y:9, width:3, height:10, fill:'var(--red)'}, ch);
+  el('rect', {x:4, y:9, width:3, height:10, fill:'var(--red)'}, ch); el('rect', {x:18, y:9, width:3, height:10, fill:'var(--red)'}, ch);
+  el('rect', {x:-30, y:22, width:60, height:3, fill:'var(--roof)'}, ch);
+  el('line', {x1:48, y1:34, x2:48, y2:-30, stroke:'var(--muted)', 'stroke-width':2}, ch);
+  el('rect', {x:49, y:-30, width:18, height:18, rx:1.5, fill:'var(--red)'}, ch);
+  el('path', {d:'M58 -26.5v11M52.5 -21h11', stroke:'#fff', 'stroke-width':3.4}, ch);
+  // cow with bell
+  const cw = el('g', {transform:'translate(110 352)'}, s);
+  [[-12,0],[-6,1],[8,0],[13,1]].forEach(([x, dy]) => el('rect', {x, y:6 + dy, width:3.4, height:11, rx:1.5, fill:'#2B2B2B'}, cw));
+  el('ellipse', {cx:0, cy:4, rx:20, ry:11, fill:'#FFFFFF', stroke:'#2B2B2B', 'stroke-width':1}, cw);
+  el('path', {d:'M-8 -4c5 1 7 6 3 9s-9 0-8-4z', fill:'#2B2B2B'}, cw); el('circle', {cx:9, cy:6, r:4, fill:'#2B2B2B'}, cw);
+  el('ellipse', {cx:23, cy:-2, rx:8, ry:7, fill:'#FFFFFF', stroke:'#2B2B2B', 'stroke-width':1}, cw);
+  el('ellipse', {cx:27, cy:1, rx:4.5, ry:3.4, fill:'#F2B8B0'}, cw);
+  el('circle', {cx:21, cy:-4, r:1.2, fill:'#2B2B2B'}, cw);
+  el('path', {d:'M17 -8l-3 -4M27 -8l3 -4', stroke:'#2B2B2B', 'stroke-width':1.6, 'stroke-linecap':'round'}, cw);
+  el('path', {d:'M19 5h6l-1 6h-4z', fill:'var(--sign)', stroke:'#7A5A00', 'stroke-width':.6}, cw);
+  el('path', {d:'M-20 2c-5 3 -5 9 -2 12', stroke:'#2B2B2B', 'stroke-width':1.2, fill:'none'}, cw);
+  // soft fade into the page
+  el('path', {d:'M0 405C300 392 700 412 1200 398L1200 420L0 420Z', fill:'var(--bg)'}, s);
+}
+drawScene();
+render();
+</script>
