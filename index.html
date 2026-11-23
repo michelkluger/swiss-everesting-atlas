@@ -120,7 +120,8 @@ details.method-d summary{font:800 1.05rem var(--poster);color:var(--ink)}
 #tip b{font-weight:600}
 @media (max-width:900px){.grid,.grid.b,.grid.even,.method{grid-template-columns:minmax(0,1fr)}.board{grid-template-columns:repeat(3,minmax(0,1fr))}.stat:nth-child(4){border-left:0}.stat:nth-child(n+4){border-top:1px solid rgba(255,255,255,.12)}}
 @media (max-width:480px){.board{grid-template-columns:repeat(2,minmax(0,1fr))}.stat:nth-child(odd){border-left:0}.stat:nth-child(n+3){border-top:1px solid rgba(255,255,255,.12)}}
-.panel select{max-width:100%}
+.ctl{min-width:0;max-width:100%}
+#lift{max-width:calc(100vw - 5rem)}
 @media (max-width:600px){.hero-text p{text-shadow:0 0 6px var(--sky2),0 0 14px var(--sky2)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -328,7 +329,7 @@ function drawProfile(x, c){
   el('line', {x1:fx, y1:fy, x2:fx, y2:fy - 17, stroke:'var(--ink)', 'stroke-width':1.2}, g);
   el('rect', {x:fx, y:fy - 17, width:10, height:9, rx:1, fill:'var(--red)'}, g);
   el('path', {d:`M${fx+5} ${fy-15.3}v5.6M${fx+2.2} ${fy-12.5}h5.6`, stroke:'#fff', 'stroke-width':1.6}, g);
-  el('text', {x:fx - 6, y:fy - 9, 'text-anchor':'end', style:'fill:var(--ink);font-family:var(--body);font-weight:600;font-size:12px'}, g, (c.n * x.rise).toLocaleString('de-CH') + ' m');
+  el('text', {x:fx - 6, y:fy - 9, 'text-anchor':'end', style:'fill:var(--ink);font-family:var(--body);font-weight:600;font-size:12px'}, g, (c.n * x.rise).toLocaleString('de-CH').replace(/'/g, '’') + ' m');
 }
 
 function drawScatter(calcs){
