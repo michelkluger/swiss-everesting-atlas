@@ -20,5 +20,8 @@ The dashboard ranks 1,461 Swiss cable cars, gondolas, chairlifts and funiculars.
 
 - `index.html`: the whole dashboard, a single file with the data embedded
 - `lifts.json`: the per-lift rows behind it
+- `data/`: every pipeline stage, from the raw OSM dump to the hand-verified timetables (see [data/README.md](data/README.md))
+
+Lift data © OpenStreetMap contributors, ODbL.
 
 Check timetables before you go. Lift operators change their hours every season.

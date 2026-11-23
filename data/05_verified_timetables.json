@@ -1,0 +1,481 @@
+{
+ "note": "Hand-verified timetables and fares (2026 season, used as proxy for 2027). Checked 2026-11-24 against operator websites; verify before travelling.",
+ "verified": {
+  "Ragnatsch-Hinterspina": {
+   "cabin": "4",
+   "verdict": "No public operator, hours or fares found. Ask Gemeinde Mels.",
+   "src": "https://www.lift-world.info/fr/lifts/15624/datas.htm"
+  },
+  "Mörel-Greich-Riederalp": {
+   "season": "All year (revision 12 Apr–5 Jun, 26 Oct–11 Dec)",
+   "first": "05:52",
+   "last": "23:05",
+   "note": "Sun to 23:30; runs after 22:03 may need a call",
+   "cabin": "large",
+   "freq": ":03 and :39 each hour",
+   "ht": 5.1,
+   "ga": "full",
+   "cost": 35.7,
+   "costNote": "7 singles at 5.10; free with a day GA",
+   "verdict": "Best fit: long hours, GA free, only 8 laps.",
+   "src": "https://www.aletscharena.ch/en/planning-booking/timetable-operating-hours"
+  },
+  "Luftseilbahn Schwägalp-Säntis": {
+   "season": "2027: 29 May–24 Oct (new lift)",
+   "first": "07:30",
+   "last": "18:30",
+   "note": "Weekdays to 17:30, weekends 18:30",
+   "cabin": "new, large",
+   "freq": "every 30 min",
+   "ht": 30,
+   "ga": "none",
+   "cost": 210,
+   "costNote": "7 singles at 30, no Halbtax; summer pass 290",
+   "verdict": "Fewest laps but short window and CHF 30 a ride.",
+   "src": "https://saentisbahn.ch/erlebnis/schwebebahn/preise-angebote/"
+  },
+  "Mürrenbahn": {
+   "season": "All year except revision weeks",
+   "first": "06:20",
+   "last": "20:12",
+   "note": "2025 timetable; new 135-person cabin since July 2026",
+   "cabin": "135",
+   "freq": "every 15 min, 30 early/late",
+   "ht": null,
+   "ga": "full",
+   "cost": null,
+   "costNote": "Fare not found; GA valid (unverified)",
+   "verdict": "Big cabin and long day, but 13 laps.",
+   "src": "https://www.tp-info.ch/sites/default/files/fap/2025/pdf/2461.pdf"
+  },
+  "Luftseilbahn Sörenberg-Brienzer Rothorn": {
+   "season": "4 Jun–1 Nov",
+   "first": "08:30",
+   "last": "17:50",
+   "note": "Every day the same",
+   "cabin": "?",
+   "freq": "every 20 min",
+   "ht": 16,
+   "ga": "50%",
+   "cost": 128,
+   "costNote": "8 singles at 16",
+   "verdict": "Window too short; no multi-ride card.",
+   "src": "https://www.soerenberg.ch/de/infos-service/bergbahnen/preise-verguenstigungen"
+  },
+  "Stockhornbahn": {
+   "season": "11 Apr–22 Nov",
+   "first": "08:50",
+   "last": "17:50",
+   "note": "Descents from Chrindi at :20 and :50",
+   "cabin": "52",
+   "freq": "every 30 min",
+   "ht": 14,
+   "ga": "50%",
+   "cost": 126,
+   "costNote": "9 singles at 14; season pass 300",
+   "verdict": "9 h window, 30-min rhythm.",
+   "src": "https://www.stockhorn.ch/informieren/fahrplan-preise/fahrplan-sommer"
+  },
+  "San Bartolomeo-Alpe Bardughè": {
+   "cabin": "4",
+   "verdict": "No public timetable. Ask Capanna Bardughè.",
+   "src": "https://www.bergbahnen.org/en/database/ch/ti/vogorno/"
+  },
+  "Luftseilbahn Golzern": {
+   "season": "Full hours 1 Jun–30 Sep",
+   "first": "06:00",
+   "last": "20:00",
+   "note": "Continuous from 6 people; new lift 2026",
+   "cabin": "?",
+   "freq": "every 30 min",
+   "ht": 11,
+   "ga": "none",
+   "cost": 135,
+   "costNote": "10-ride card 80 + 5 singles at 11",
+   "verdict": "Long 14 h window, but 16 short laps.",
+   "src": "https://www.lsb-golzern.ch/fahrplan"
+  },
+  "Luftseilbahn Lungern-Turren": {
+   "season": "Mid May–1 Nov",
+   "first": "08:20",
+   "last": "18:00",
+   "note": "Weekdays to 17:00",
+   "cabin": "40",
+   "freq": "every 20 min",
+   "ht": 12,
+   "ga": "50%",
+   "cost": 120,
+   "costNote": "10 singles at 12",
+   "verdict": "Short window; no valley trail documented.",
+   "src": "https://turren.ch/en/cable-car/timetable"
+  },
+  "Chur - Känzeli": {
+   "season": "Daily 5 Jun–25 Oct",
+   "first": "08:30",
+   "last": "17:00",
+   "note": "Weekdays to 16:30; Sat evenings to 20:00 in summer",
+   "cabin": "45",
+   "freq": "every 20 min",
+   "ht": 7,
+   "ga": "50%",
+   "cost": 84,
+   "costNote": "20-point card 84 with Halbtax",
+   "verdict": "Closes too early for 15 laps.",
+   "src": "https://www.churbergbahnen.ch/de/Bergbahnen/Betriebszeiten-Tarife"
+  },
+  "Aeugstenbahn": {
+   "season": "1 May–31 Oct",
+   "first": "07:00",
+   "last": "19:00",
+   "note": "Weekdays 07:15–18:45; some runs by phone",
+   "cabin": "8",
+   "freq": "about every 30 min",
+   "ht": 28,
+   "ga": "none",
+   "cost": 234,
+   "costNote": "Solo: 12 card ride + 14 solo surcharge, 9 rides",
+   "verdict": "Solo surcharge doubles the fare; bring a partner.",
+   "src": "https://aeugstenbahn.ch/tarife/"
+  },
+  "Luftseilbahn Engelberg-Fürenalp": {
+   "season": "Summer hours May–Oct",
+   "first": "08:00",
+   "last": "17:40",
+   "note": "Jul–Sep; runs from 4 people",
+   "cabin": "8",
+   "freq": "every 15–20 min",
+   "ht": 14,
+   "ga": "none",
+   "cost": 154,
+   "costNote": "11 singles at 14, no Halbtax",
+   "verdict": "Very steep path, but closes 17:40.",
+   "src": "https://www.fuerenalp.ch/oeffnungszeiten"
+  },
+  "Luftseilbahn Brunnen-Urmiberg": {
+   "season": "Spring to mid Nov",
+   "first": "09:05",
+   "last": "18:05",
+   "note": "Cash only at the top",
+   "cabin": "6",
+   "freq": "every 30 min",
+   "ht": 13,
+   "ga": "none",
+   "cost": 156,
+   "costNote": "12 singles at 13, no Halbtax",
+   "verdict": "9 h window, cash only.",
+   "src": "https://www.urmiberg.ch"
+  },
+  "Harderbahn": {
+   "season": "Early Apr–end Nov",
+   "first": "09:10",
+   "last": "21:40",
+   "note": "2025 timetable; some summer dates to 23:10",
+   "cabin": "funicular",
+   "freq": "every 30 min",
+   "ht": 10,
+   "ga": "50%",
+   "cost": 120,
+   "costNote": "12 singles at about 10 (2022 fare)",
+   "verdict": "Evening runs help; 2026 fares not public.",
+   "src": "https://www.jungfrau.ch/de-ch/harder-kulm/"
+  },
+  "Luftseilbahn Kandersteg-Allmenalp": {
+   "season": "May–Oct (2027 from 6 May)",
+   "first": "08:30",
+   "last": "18:00",
+   "note": "17:00 from 31 Aug",
+   "cabin": "8",
+   "freq": "every 15 min",
+   "ht": 14,
+   "ga": "50%",
+   "cost": 200,
+   "costNote": "Season pass 200 beats 16 singles",
+   "verdict": "Steep, but 17 laps in a 9.5 h window.",
+   "src": "https://www.allmenalp.ch/de/luftseilbahn/preise.html"
+  },
+  "Luftseilbahn Kohlplatz–Brüsti": {
+   "season": "1 Jun–30 Sep timetable",
+   "first": "07:00",
+   "last": "19:00",
+   "note": "Lunch gap 11:45–13:00; change at Kohlplatz",
+   "cabin": "8",
+   "freq": "every 30 min",
+   "ht": null,
+   "ga": "?",
+   "cost": 99,
+   "costNote": "9 singles at 11 (full fare)",
+   "verdict": "Lunch gap and two sections slow it.",
+   "src": "https://www.xn--brsti-surenenpass-32b.ch/seilbahn-sommer"
+  },
+  "Luftseilbahn Staldenried - Gspon": {
+   "season": "All year; half-hourly 9 May–25 Oct",
+   "first": "04:05",
+   "last": "21:40",
+   "note": "Fri/Sat extra 23:10; 2nd-Monday revision gaps",
+   "cabin": "10",
+   "freq": "every 30 min",
+   "ht": 7.6,
+   "ga": "50%",
+   "cost": 76,
+   "costNote": "Two 6-ride cards at 38 with Halbtax",
+   "verdict": "Longest window (17.6 h); trail unconfirmed.",
+   "src": "https://staldenried.ch/wp-content/uploads/2025/12/2025-12-14_Tarif_ab_14_Dezember_2025.pdf"
+  },
+  "Schwandibahn": {
+   "season": "2 May–15 Nov, weekends only",
+   "first": "07:30",
+   "last": "18:00",
+   "note": "Lunch break 12–13; cash only",
+   "cabin": "4",
+   "freq": "every 30 min",
+   "ht": null,
+   "ga": "?",
+   "cost": 117,
+   "costNote": "13 singles at 9 (full fare)",
+   "verdict": "Weekends only, 4-seat cabin.",
+   "src": "https://schwandibahn.ch"
+  },
+  "Milchseilbahn": {
+   "season": "Tue–Sun, to 25 Oct",
+   "first": "09:00",
+   "last": "16:30",
+   "note": "Closed Mondays; booked time slots",
+   "cabin": "8",
+   "freq": "15–30 min",
+   "ht": 30,
+   "ga": "none",
+   "cost": 300,
+   "costNote": "10 rides at 30, no discounts",
+   "verdict": "Expensive and short day.",
+   "src": "https://www.flimslaax.com/milchseilbahn"
+  },
+  "Braunwaldbahn": {
+   "season": "All year, daily",
+   "first": "05:25",
+   "last": "23:55",
+   "note": "q15 weekdays, q30 weekend middays and evenings",
+   "cabin": "114",
+   "freq": "every 15–30 min",
+   "ht": 3.8,
+   "ga": "full",
+   "cost": 7.6,
+   "costNote": "Halbtax day ticket 7.60 (unlimited rides unverified)",
+   "verdict": "Cheapest and longest day; 15 laps.",
+   "src": "https://braunwald.ch/de/planen-buchen/bergbahnen-sommer/braunwald-standseilbahn/tarife.html"
+  },
+  "Palfriesbahn": {
+   "season": "23 May–15 Nov",
+   "first": "08:00",
+   "last": "17:30",
+   "note": "Lunch break 11:45–13:00; booking recommended",
+   "cabin": "8",
+   "freq": "every 15 min",
+   "ht": 15,
+   "ga": "none",
+   "cost": 105,
+   "costNote": "7 singles at 15, no Halbtax (10-ride card 130)",
+   "verdict": "Big 1,250 m laps, but lunch break and 17:30 close.",
+   "src": "https://seilbahn-palfries.ch/infos/"
+  },
+  "Älplibahn Malans": {
+   "season": "Mid May–mid Nov",
+   "first": "07:00",
+   "last": "18:00",
+   "note": "Weekends; weekdays 08–17; booking required for every ride",
+   "cabin": "8",
+   "freq": "every 15 min",
+   "ht": 14,
+   "ga": "?",
+   "cost": 98,
+   "costNote": "7 singles at 14 (no Halbtax listed)",
+   "verdict": "Phone booking for every ride; 8 big laps.",
+   "src": "https://www.aelplibahn.ch/praktische-infos/"
+  },
+  "Telecabina Monte Tamaro": {
+   "season": "1 Apr–8 Nov",
+   "first": "08:30",
+   "last": "18:00",
+   "note": "Jul–Aug; otherwise 17:00",
+   "cabin": "8",
+   "freq": "gondola",
+   "ht": 13,
+   "ga": "50%",
+   "cost": 104,
+   "costNote": "8 singles at 13",
+   "verdict": "Gondola, no waits, but closes 18:00.",
+   "src": "https://www.montetamaro.ch/en/cable-car"
+  },
+  "Luftseilbahn Beckenried-Klewenalp": {
+   "season": "14 May–1 Nov",
+   "first": "08:00",
+   "last": "19:15",
+   "note": "13 Jun–27 Sep; Fri/Sat to 20:15",
+   "cabin": "70",
+   "freq": "every 30 min",
+   "ht": 13.5,
+   "ga": "full",
+   "cost": 22.5,
+   "costNote": "Hiking day pass 22.50 with Halbtax (ride count unverified); free with GA",
+   "verdict": "GA free and big laps, but 11 h window.",
+   "src": "https://www.klewenalp.ch/en/informationen/prices"
+  },
+  "Adliswil-Felsenegg": {
+   "season": "All year; summer 11 Apr–24 Oct",
+   "first": "08:05",
+   "last": "22:05",
+   "note": "Sundays to 20:05",
+   "cabin": "30",
+   "freq": "every 15 min",
+   "ht": null,
+   "ga": "full",
+   "cost": null,
+   "costNote": "ZVV ticket; free with GA",
+   "verdict": "34 min from Zürich, great training hill, 29 laps.",
+   "src": "https://www.szu.ch/fahrplanfelseneggbahn"
+  },
+  "Rotenfluebahn (both sections)": {
+   "season": "9 May–25 Oct",
+   "first": "08:30",
+   "last": "17:30",
+   "note": "Two sections, about 15 min ride",
+   "cabin": "8",
+   "freq": "gondola",
+   "ht": 14,
+   "ga": "?",
+   "cost": 126,
+   "costNote": "9 singles at 14",
+   "verdict": "No waits, but 9 h window.",
+   "src": "https://www.mythenregion.ch/sommer/tickets/rotenfluebahn/"
+  }
+ },
+ "season2027": {
+  "Mörel-Greich-Riederalp": {
+   "all": 1,
+   "s": "06-06",
+   "e": "10-25"
+  },
+  "Luftseilbahn Schwägalp-Säntis": {
+   "s": "05-29",
+   "e": "10-24"
+  },
+  "Mürrenbahn": {
+   "all": 1,
+   "s": "05-03",
+   "e": "10-26"
+  },
+  "Luftseilbahn Sörenberg-Brienzer Rothorn": {
+   "s": "06-04",
+   "e": "11-01"
+  },
+  "Stockhornbahn": {
+   "s": "04-11",
+   "e": "11-22"
+  },
+  "Luftseilbahn Golzern": {
+   "all": 1,
+   "s": "06-01",
+   "e": "09-30"
+  },
+  "Luftseilbahn Lungern-Turren": {
+   "s": "05-14",
+   "e": "11-01"
+  },
+  "Chur - Känzeli": {
+   "s": "06-05",
+   "e": "10-25"
+  },
+  "Aeugstenbahn": {
+   "s": "05-01",
+   "e": "10-31"
+  },
+  "Luftseilbahn Engelberg-Fürenalp": {
+   "all": 1,
+   "s": "07-01",
+   "e": "09-30"
+  },
+  "Luftseilbahn Brunnen-Urmiberg": {
+   "s": "04-01",
+   "e": "11-15"
+  },
+  "Harderbahn": {
+   "s": "04-03",
+   "e": "11-29"
+  },
+  "Luftseilbahn Kandersteg-Allmenalp": {
+   "s": "05-06",
+   "e": "10-25"
+  },
+  "Luftseilbahn Kohlplatz–Brüsti": {
+   "all": 1,
+   "s": "06-01",
+   "e": "09-30"
+  },
+  "Luftseilbahn Staldenried - Gspon": {
+   "all": 1,
+   "s": "05-09",
+   "e": "10-25"
+  },
+  "Schwandibahn": {
+   "s": "05-02",
+   "e": "11-15",
+   "note": "weekends only"
+  },
+  "Milchseilbahn": {
+   "s": "05-15",
+   "e": "10-25"
+  },
+  "Braunwaldbahn": {
+   "all": 1,
+   "s": "01-01",
+   "e": "12-31"
+  },
+  "Palfriesbahn": {
+   "s": "05-23",
+   "e": "11-15"
+  },
+  "Älplibahn Malans": {
+   "s": "05-15",
+   "e": "11-14"
+  },
+  "Telecabina Monte Tamaro": {
+   "all": 1,
+   "s": "04-01",
+   "e": "11-08"
+  },
+  "Luftseilbahn Beckenried-Klewenalp": {
+   "o": [
+    "05-14",
+    "11-01"
+   ],
+   "s": "06-13",
+   "e": "09-27"
+  },
+  "Adliswil-Felsenegg": {
+   "all": 1,
+   "s": "04-11",
+   "e": "10-24"
+  },
+  "Rotenfluebahn (both sections)": {
+   "s": "05-09",
+   "e": "10-25"
+  }
+ },
+ "notes": {
+  "Ragnatsch-Hinterspina": "Private 4-seat lift. Ask the operator about hours.",
+  "Mürrenbahn": "Lauterbrunnen–Grütschalp. Big cabin, GA valid.",
+  "Braunwaldbahn": "Village funicular, GA valid, closest long-hours option.",
+  "Luftseilbahn Schwägalp-Säntis": "Fewest laps. Day hours, pricey.",
+  "Aeugstenbahn": "8-seat cabin, steep trail.",
+  "Luftseilbahn Brunnen-Urmiberg": "6-seat cabin.",
+  "Luftseilbahn Engelberg-Fürenalp": "8-seat cabin, cliff trail.",
+  "Stockhornbahn": "Erlenbach–Chrindi section.",
+  "Mörel-Greich-Riederalp": "Village access lift, GA valid.",
+  "Stoosbahn (Schlattli–Stoos)": "Village funicular, long hours.",
+  "Luftseilbahn Wasserauen-Ebenalp": "Queues on sunny weekends.",
+  "Luftseilbahn Hoher Kasten": "Queues on sunny weekends.",
+  "Uetlibergbahn (S10) Triemli→Uetliberg": "21 min away. Many short laps.",
+  "Luftseilbahn Kälti-Stanserhorn (CabriO)": "Long laps. Day hours.",
+  "Chur - Känzeli": "45-seat cabin.",
+  "Luftseilbahn Kohlplatz–Brüsti": "8-seat cabin."
+ }
+}
