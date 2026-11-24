@@ -168,12 +168,6 @@ details.method-d summary{font:800 1.05rem var(--poster);color:var(--ink)}
   </section>
   <section class="awards-wrap"><h2 class="aw-h">Best in each category <span id="awPace"></span></h2><div class="awards" id="awards"></div></section>
 
-<section class="panel race" id="race">
-    <h2>Race day: who reaches 8’848 m?</h2>
-    <details class="howto"><summary>How to read this</summary><p class="cap">One June day, every checked lift at once, at your pace. Each lane is a row of laps: one small mountain per climb, so short laps make many small peaks. The hiker climbs, the red cabin carries them down, and the lane fills in blue as height adds up. When a lift closes before the hiker is done, the lane turns grey and shows the closing time in red. The summit flag goes up at 8’848 m, but only if the last lap ends before the last ride down, the same rule as the opening-hours chart. Click a lane to open that lift above.</p></details>
-    <div class="race-ctl"><button type="button" id="rPlay" class="rbtn">▶ Play</button><input type="range" id="rScrub" min="3" max="24" step="0.0166" value="3" aria-label="Time of day"><output id="rClock">03:00</output></div>
-    <svg id="racesvg" viewBox="0 0 1200 800" role="img" aria-label="Animated race of all checked lifts towards 8848 metres over one day"></svg>
-  </section>
 
   <div class="grid even">
     <section class="panel">
@@ -238,6 +232,13 @@ details.method-d summary{font:800 1.05rem var(--poster);color:var(--ink)}
       <svg id="bars" viewBox="0 0 560 420" role="img" aria-label="Stacked bars of hours per shortlist lift"></svg>
     </section>
   </div>
+
+  <section class="panel race" id="race">
+    <h2>Race day: who reaches 8’848 m?</h2>
+    <details class="howto"><summary>How to read this</summary><p class="cap">One June day, every checked lift at once, at your pace. Each lane is a row of laps: one small mountain per climb, so short laps make many small peaks. The hiker climbs, the red cabin carries them down, and the lane fills in blue as height adds up. When a lift closes before the hiker is done, the lane turns grey and shows the closing time in red. The summit flag goes up at 8’848 m, but only if the last lap ends before the last ride down, the same rule as the opening-hours chart. Click a lane to open that lift above.</p></details>
+    <div class="race-ctl"><button type="button" id="rPlay" class="rbtn">▶ Play</button><input type="range" id="rScrub" min="3" max="24" step="0.0166" value="3" aria-label="Time of day"><output id="rClock">03:00</output></div>
+    <svg id="racesvg" viewBox="0 0 1200 800" role="img" aria-label="Animated race of all checked lifts towards 8848 metres over one day"></svg>
+  </section>
 
   <details class="method-d"><summary>How this was measured, the time model, and ways to stretch the day</summary>
   <section class="method">
