@@ -675,13 +675,13 @@ function drawRace(top){
   el('rect', {x:0, y:H0 - 40, width:W, height:40, fill:'url(#rFade)'}, scene);
   // clock board and counters
   const bd = el('g', {transform:'translate(22 20)'}, s);
-  el('rect', {width:178, height:84, rx:10, fill:'#0F2C55'}, bd);
+  el('rect', {width:178, height:150, rx:10, fill:'#0F2C55'}, bd);
   el('text', {x:16, y:22, style:'font:600 10px var(--body);letter-spacing:.12em;fill:#9DB3D6'}, bd, 'A JUNE DAY · 2027');
   const clk = el('text', {x:14, y:66, style:'font:600 40px var(--mono);fill:#fff;letter-spacing:-.02em'}, bd, '03:00');
-  const ctr = el('g', {transform:'translate(214 24)'}, s);
-  const chip = (i, color, shape, label) => { const g = el('g', {transform:`translate(${i * 150} 0)`}, ctr);
-    el('rect', {width:140, height:30, rx:15, fill:'#0B1230', 'fill-opacity':.55}, g); mark(g, shape, 18, 15, 5.5).setAttribute('fill', color);
-    const n = el('text', {x:34, y:20, style:'font:700 14px var(--body);fill:#fff'}, g, '0'); el('text', {x:58, y:20, style:'font:500 11.5px var(--body);fill:#E6EDF1'}, g, label); return n; };
+  const ctr = el('g', {transform:'translate(36 114)'}, s);
+  const chip = (i, color, shape, label) => { const g = el('g', {transform:`translate(0 ${i * 20})`}, ctr);
+    mark(g, shape, 4, -4, 4.5).setAttribute('fill', color);
+    const n = el('text', {x:16, y:0, style:'font:700 13px var(--body);fill:#fff;font-variant-numeric:tabular-nums'}, g, '0'); el('text', {x:38, y:0, style:'font:500 11px var(--body);fill:#C9D6EA'}, g, label); return n; };
   const cDone = chip(0, 'var(--good)', 0, 'at the summit'), cOn = chip(1, 'var(--s1)', 0, 'on the trail'), cShut = chip(2, 'var(--crit)', 2, 'lift closed');
   // --- altitude axis
   const ax = el('g', {}, s), yAx = H0 + 24;
@@ -729,9 +729,9 @@ function raceAt(t){
   R.st1.setAttribute('stop-color', top); R.st2.setAttribute('stop-color', bot); R.back.setAttribute('fill', mb); R.front.setAttribute('fill', mf);
   R.snowG.setAttribute('fill', snow); R.stars.setAttribute('opacity', so);
   const sr = 5.55, ss = 21.45, fx = (t - sr) / (ss - sr);
-  if (fx > 0 && fx < 1) { R.sun.setAttribute('transform', `translate(${230 + fx * 900} ${172 - Math.sin(Math.PI * fx) * 92})`); R.sun.setAttribute('opacity', 1); } else R.sun.setAttribute('opacity', 0);
+  if (fx > 0 && fx < 1) { R.sun.setAttribute('transform', `translate(${230 + fx * 900} ${150 - Math.sin(Math.PI * fx) * 125})`); R.sun.setAttribute('opacity', 1); } else R.sun.setAttribute('opacity', 0);
   const nf = t >= ss ? (t - ss) / (24 + sr - ss) : t <= sr ? (t + 24 - ss) / (24 + sr - ss) : -1;
-  if (nf >= 0) { R.moon.setAttribute('transform', `translate(${260 + nf * 860} ${140 - Math.sin(Math.PI * nf) * 72})`); R.moon.setAttribute('opacity', 1); R.moon.querySelector('.moonbite').setAttribute('fill', top); } else R.moon.setAttribute('opacity', 0);
+  if (nf >= 0) { R.moon.setAttribute('transform', `translate(${260 + nf * 860} ${130 - Math.sin(Math.PI * nf) * 95})`); R.moon.setAttribute('opacity', 1); R.moon.querySelector('.moonbite').setAttribute('fill', top); } else R.moon.setAttribute('opacity', 0);
   const anyOpen = R.lanes.some(l => t >= l.m.F && t <= l.m.Lt), ph = anyOpen ? (Math.sin(t * Math.PI * 4) + 1) / 2 : 0;
   R.cab.setAttribute('transform', `translate(${R.cA[0] + (R.cB[0] - R.cA[0]) * ph} ${R.cA[1] + (R.cB[1] - R.cA[1]) * ph})`);
   R.clk.textContent = hm(t); const rc = $('#rClock'); if (rc) rc.textContent = hm(t); const sc = $('#rScrub'); if (sc && document.activeElement !== sc) sc.value = t;
