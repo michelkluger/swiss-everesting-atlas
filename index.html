@@ -120,6 +120,22 @@ details.method-d summary{font:800 1.05rem var(--poster);color:var(--ink)}
 #tip b{font-weight:600}
 @media (max-width:900px){.grid,.grid.b,.grid.even,.method{grid-template-columns:minmax(0,1fr)}.board{grid-template-columns:repeat(3,minmax(0,1fr))}.stat:nth-child(4){border-left:0}.stat:nth-child(n+4){border-top:1px solid rgba(255,255,255,.12)}}
 @media (max-width:480px){.board{grid-template-columns:repeat(2,minmax(0,1fr))}.stat:nth-child(odd){border-left:0}.stat:nth-child(n+3){border-top:1px solid rgba(255,255,255,.12)}}
+
+.race-ctl{display:flex;align-items:center;gap:.9rem;margin:.2rem 0 .7rem}
+.rbtn{font:600 .85rem var(--body);background:var(--red);color:#fff;border:0;border-radius:999px;padding:.4rem 1rem;cursor:pointer;min-width:6.5rem}
+.rbtn:hover{filter:brightness(1.08)}
+#rScrub{flex:1;min-width:0;accent-color:var(--red)}
+#rClock{font:600 .95rem var(--mono);color:var(--ink);min-width:3.2rem;text-align:right}
+#racesvg .lane{cursor:pointer}
+#racesvg .lane:hover .lbg{fill-opacity:.55}
+.export{background:#0F1720}
+.export .hero,.export main>:not(.race),.export .race-ctl,.export .race .howto,.export #tip{display:none!important}
+.export main{padding-block:28px}
+.export .race{box-shadow:none;display:flex;flex-direction:column}
+.export .race h2{font-size:2rem;margin-bottom:.2rem}
+.export .race::before{content:"Hike up, ride the lift down, repeat until 8’848 m. The lift closing time decides who makes it.";display:block;order:2;font:500 1.05rem var(--body);color:var(--muted);margin:0 0 1rem}
+.export .race h2{order:1}.export #racesvg{order:3}
+.export .race::after{content:"michelkluger.github.io/swiss-everesting-atlas";display:block;order:4;font:500 .95rem var(--mono);color:var(--muted);margin-top:.8rem;text-align:right}
 .ctl{min-width:0;max-width:100%}
 #lift{max-width:calc(100vw - 5rem)}
 @media (max-width:600px){.hero-text p{text-shadow:0 0 6px var(--sky2),0 0 14px var(--sky2)}}
@@ -151,6 +167,13 @@ details.method-d summary{font:800 1.05rem var(--poster);color:var(--ink)}
   </div>
   </section>
   <section class="awards-wrap"><h2 class="aw-h">Best in each category <span id="awPace"></span></h2><div class="awards" id="awards"></div></section>
+
+<section class="panel race" id="race">
+    <h2>Race day: who reaches 8’848 m?</h2>
+    <details class="howto"><summary>How to read this</summary><p class="cap">One June day, every checked lift at once, at your pace. Each lane is a row of laps: one small mountain per climb, so short laps make many small peaks. The hiker climbs, the red cabin carries them down, and the lane fills in blue as height adds up. When a lift closes before the hiker is done, the lane turns grey and shows the closing time in red. The summit flag goes up at 8’848 m, but only if the last lap ends before the last ride down, the same rule as the opening-hours chart. Click a lane to open that lift above.</p></details>
+    <div class="race-ctl"><button type="button" id="rPlay" class="rbtn">▶ Play</button><input type="range" id="rScrub" min="3" max="24" step="0.0166" value="3" aria-label="Time of day"><output id="rClock">03:00</output></div>
+    <svg id="racesvg" viewBox="0 0 1200 800" role="img" aria-label="Animated race of all checked lifts towards 8848 metres over one day"></svg>
+  </section>
 
   <div class="grid even">
     <section class="panel">
@@ -188,6 +211,18 @@ details.method-d summary{font:800 1.05rem var(--poster);color:var(--ink)}
       <h2>Is the trip worth it?</h2>
       <details class="howto"><summary>How to read this</summary><p class="cap">Lift hours needed against travel time. The dashed staircase links the lifts that nothing else beats on both: no other lift is closer and also quicker. Hover a dot to see the door-to-door day.</p></details>
       <svg id="dist" viewBox="0 0 640 380" role="img" aria-label="Scatter of travel time from Zürich against lift hours needed"></svg>
+    </section>
+  </div>
+<div class="grid even">
+    <section class="panel">
+      <h2>Biggest climb for the distance</h2>
+      <details class="howto"><summary>How to read this</summary><p class="cap">Every lift: height gained per lap against travel time from Zürich HB. The dashed staircase links the lifts that nothing beats on both counts, meaning no other lift is closer and also climbs more. Bigger laps mean fewer lift rides, but only steep trails make them fast.</p></details>
+      <svg id="risetr" viewBox="0 0 640 420" role="img" aria-label="Rise per lap against travel time"></svg>
+    </section>
+    <section class="panel">
+      <h2>Biggest climb for the money</h2>
+      <details class="howto"><summary>How to read this</summary><p class="cap">Checked lifts: height gained per lap against the lift fares for one attempt with your Halbtax. A green ring means the GA is fully valid, so with a day GA (from CHF 29) those cost nothing extra. The staircase links the lifts nothing beats on both: no other lift is cheaper and also climbs more.</p></details>
+      <svg id="risepr" viewBox="0 0 640 420" role="img" aria-label="Rise per lap against cost per attempt"></svg>
     </section>
   </div>
   <div class="grid b">
@@ -566,6 +601,196 @@ function drawCostTravel(top){
     hit.onmousemove = ev => showTip(ev, `<b>${clean(p.x.name)}</b><br>${p.x.travel} min from Zürich<br>${p.v.cost != null ? 'CHF ' + Math.round(p.v.cost) + ' with Halbtax' : 'fare not found'}${p.v.ga === 'full' ? '<br>Free with a day GA' : ''}<br>${p.v.costNote || ''}`); hit.onmouseleave = hideTip; hit.onclick = () => select(p.x.name);
   });
 }
+
+// ---------- Race day animation ----------
+const RACE = {T:3, t0:3, playing:false, lanes:[], raf:0, last:0, DUR:32, seen:false};
+const hm = h => { const m = Math.round(h * 60); return String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
+const sw = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '’');
+const SKY = [ // hour, sky top, sky bottom, back range, front range, snow, stars
+  [3,'#0B1230','#1E2B52','#2A3556','#1C2440','#9FB0CC',1],[4.8,'#1F2552','#6B5A8E','#3A3D66','#252848','#C9B6D6',.7],
+  [5.8,'#4B5C9E','#F4A47E','#6D6A92','#3E3F66','#FFC9B0',.1],[7.5,'#7CC0EA','#E3F3FB','#9FB8CC','#7894A8','#FFFFFF',0],
+  [13,'#5FB0E6','#D3EDFA','#A6BDD0','#7F9AAE','#FFFFFF',0],[19.3,'#6CA6D8','#F7DDB0','#9AAFC4','#71879C','#FFF4E6',0],
+  [21.1,'#3F4682','#F28C6C','#6B5E86','#433E66','#FFB59A',.15],[22.3,'#151B42','#3B2F62','#363A62','#232644','#B9B4D4',.8],
+  [24,'#0B1230','#1E2B52','#2A3556','#1C2440','#9FB0CC',1]];
+const mixHex = (a, b, f) => '#' + [0, 2, 4].map(i => Math.round(parseInt(a.substr(1 + i, 2), 16) * (1 - f) + parseInt(b.substr(1 + i, 2), 16) * f).toString(16).padStart(2, '0')).join('');
+function skyAt(t){ let i = 0; while (i < SKY.length - 2 && SKY[i + 1][0] <= t) i++; const a = SKY[i], b = SKY[i + 1], f = Math.min(1, Math.max(0, (t - a[0]) / (b[0] - a[0])));
+  return a.slice(1).map((v, k) => typeof v === 'number' ? v + (b[k + 1] - v) * f : mixHex(v, b[k + 1], f)); }
+function laneModel(d){ // timeline of one lift's day; hours
+  const up = d.c.up / 60, dsc = (d.x.ride + d.x.wait + 2) / 60, rise = d.x.rise, n = d.c.n, S = d.f - up, laps = [];
+  let t = S, fin = null, stuck = null;
+  for (let k = 0; k < n; k++) { const cs = t, ce = cs + up;
+    if (k === n - 1) { fin = cs + up * (8848 - k * rise) / rise; laps.push({cs, ce: fin}); break; }
+    laps.push({cs, ce, de: ce + dsc});
+    if (ce > d.l + 1e-9) { stuck = k; break; }
+    t = ce + dsc; }
+  return {d, up, dsc, rise, n, S, laps, fin, stuck, F: d.f, Lt: d.l};
+}
+function laneAt(m, t){ // {alt, mode, frac, k}
+  if (t < m.S) return {alt: 0, mode: 'pre', k: 0, frac: 0};
+  for (let k = 0; k < m.laps.length; k++) { const lp = m.laps[k];
+    if (t < lp.cs) return {alt: k * m.rise, mode: 'pre', k, frac: 0};
+    if (t < lp.ce) return {alt: k * m.rise + m.rise * (t - lp.cs) / m.up, mode: 'up', k, frac: (t - lp.cs) / m.up};
+    const last = k === m.laps.length - 1;
+    if (last && m.fin != null) return {alt: 8848, mode: 'done', k, frac: 1};
+    if (last && m.stuck === k) return {alt: (k + 1) * m.rise, mode: 'stuck', k, frac: 1};
+    if (t < lp.de) return {alt: (k + 1) * m.rise, mode: 'down', k, frac: (t - lp.ce) / m.dsc}; }
+  return {alt: 8848, mode: 'done', k: m.laps.length - 1, frac: 1};
+}
+function drawRace(top){
+  const s = $('#racesvg'); if (!s) return; s.innerHTML = '';
+  const models = top.filter(d => d.f != null && d.l != null && !d.v.nosummer).map(laneModel);
+  models.forEach(m => { m.done = m.fin != null && m.fin <= m.Lt + 1e-9; m.final = m.done ? 8848 : laneAt(m, m.Lt).alt; });
+  models.sort((a, b) => (b.done - a.done) || (a.done ? a.fin - b.fin : b.final - a.final));
+  RACE.t0 = Math.max(0, Math.floor(Math.min(...models.map(m => m.S)) * 2) / 2);
+  const scrub = $('#rScrub'); scrub.min = RACE.t0;
+  const W = 1200, H0 = 190, AX = 34, rowH = 30, X0 = 300, X1 = 1060, Ht = H0 + AX + models.length * rowH + 16;
+  s.setAttribute('viewBox', `0 0 ${W} ${Ht}`);
+  const X = a => X0 + Math.min(a, 8848) / 8848 * (X1 - X0);
+  const defs = el('defs', {}, s);
+  // --- sky scene
+  const sg = el('linearGradient', {id:'rSky', x1:0, y1:0, x2:0, y2:1}, defs);
+  const st1 = el('stop', {offset:0}, sg), st2 = el('stop', {offset:1}, sg);
+  const fade = el('linearGradient', {id:'rFade', x1:0, y1:0, x2:0, y2:1}, defs);
+  el('stop', {offset:0, 'stop-color':'var(--surface)', 'stop-opacity':0}, fade); el('stop', {offset:1, 'stop-color':'var(--surface)', 'stop-opacity':1}, fade);
+  const clipS = el('clipPath', {id:'rSceneClip'}, defs); el('rect', {x:0, y:0, width:W, height:H0, rx:12}, clipS);
+  const scene = el('g', {'clip-path':'url(#rSceneClip)'}, s);
+  el('rect', {x:0, y:0, width:W, height:H0, fill:'url(#rSky)'}, scene);
+  const stars = el('g', {}, scene);
+  for (let i = 0; i < 46; i++) el('circle', {cx:(i * 263) % W, cy:8 + (i * 97) % 110, r:i % 4 ? .9 : 1.6, fill:'#fff', 'fill-opacity':.5 + (i % 3) * .2}, stars);
+  const sun = el('g', {}, scene); el('circle', {r:26, fill:'#FFE38A', 'fill-opacity':.25}, sun); el('circle', {r:17, fill:'#FFD23F'}, sun);
+  const moon = el('g', {}, scene); el('circle', {r:14, fill:'#F3F0DC'}, moon); el('circle', {cx:6, cy:-4, r:12, fill:'#1E2B52', class:'moonbite'}, moon);
+  const ridge = (pts, base) => 'M' + pts.map(p => p.join(' ')).join('L') + `L${W} ${base}L0 ${base}Z`;
+  const backPts = [[0,140],[90,112],[170,128],[260,84],[330,110],[420,62],[470,80],[560,40],[600,52],[680,100],[760,72],[840,96],[930,58],[990,76],[1080,104],[1150,86],[1200,98]];
+  const back = el('path', {d:ridge(backPts, H0)}, scene);
+  const snowG = el('g', {}, scene);
+  backPts.forEach((p, i) => { if (!i || i === backPts.length - 1) return; const a = backPts[i - 1], b = backPts[i + 1]; if (p[1] > a[1] || p[1] > b[1] || p[1] > 90) return;
+    const f = .32, L1 = [p[0] + (a[0] - p[0]) * f, p[1] + (a[1] - p[1]) * f], R1 = [p[0] + (b[0] - p[0]) * f, p[1] + (b[1] - p[1]) * f];
+    el('path', {d:`M${L1}L${p}L${R1}L${R1[0] - (R1[0] - p[0]) * .35} ${R1[1] - 4}L${p[0] + (R1[0] - p[0]) * .1} ${R1[1] + 3}L${p[0] - (p[0] - L1[0]) * .4} ${L1[1] - 5}Z`}, snowG); });
+  const front = el('path', {d:ridge([[0,170],[120,138],[230,158],[340,126],[450,150],[560,118],[690,152],[800,128],[910,156],[1020,124],[1120,148],[1200,136]], H0)}, scene);
+  // cable car over the front range
+  const cA = [440, 152], cB = [818, 98];
+  el('line', {x1:cA[0], y1:cA[1], x2:cB[0], y2:cB[1], stroke:'#1B2A33', 'stroke-opacity':.55, 'stroke-width':1.2}, scene);
+  const cab = el('g', {}, scene); el('line', {x1:0, y1:-8, x2:0, y2:0, stroke:'#1B2A33', 'stroke-width':1.2}, cab);
+  el('rect', {x:-9, y:0, width:18, height:13, rx:3.5, fill:'#DA291C'}, cab); el('rect', {x:-6.5, y:2.6, width:13, height:4.6, rx:1.2, fill:'#fff', 'fill-opacity':.9}, cab);
+  el('rect', {x:0, y:H0 - 40, width:W, height:40, fill:'url(#rFade)'}, scene);
+  // clock board and counters
+  const bd = el('g', {transform:'translate(22 20)'}, s);
+  el('rect', {width:178, height:84, rx:10, fill:'#0F2C55'}, bd);
+  el('text', {x:16, y:22, style:'font:600 10px var(--body);letter-spacing:.12em;fill:#9DB3D6'}, bd, 'A JUNE DAY · 2027');
+  const clk = el('text', {x:14, y:66, style:'font:600 40px var(--mono);fill:#fff;letter-spacing:-.02em'}, bd, '03:00');
+  const ctr = el('g', {transform:'translate(214 24)'}, s);
+  const chip = (i, color, shape, label) => { const g = el('g', {transform:`translate(${i * 150} 0)`}, ctr);
+    el('rect', {width:140, height:30, rx:15, fill:'#0B1230', 'fill-opacity':.55}, g); mark(g, shape, 18, 15, 5.5).setAttribute('fill', color);
+    const n = el('text', {x:34, y:20, style:'font:700 14px var(--body);fill:#fff'}, g, '0'); el('text', {x:58, y:20, style:'font:500 11.5px var(--body);fill:#E6EDF1'}, g, label); return n; };
+  const cDone = chip(0, 'var(--good)', 0, 'at the summit'), cOn = chip(1, 'var(--s1)', 0, 'on the trail'), cShut = chip(2, 'var(--crit)', 2, 'lift closed');
+  // --- altitude axis
+  const ax = el('g', {}, s), yAx = H0 + 24;
+  for (let a = 0; a <= 8000; a += 2000) { el('line', {x1:X(a), x2:X(a), y1:yAx + 6, y2:Ht - 10, stroke:'var(--grid)'}, ax); el('text', {x:X(a), y:yAx, 'text-anchor':'middle'}, ax, sw(a) + ' m'); }
+  el('line', {x1:X(8848), x2:X(8848), y1:yAx + 6, y2:Ht - 10, stroke:'var(--ink)', 'stroke-opacity':.5, 'stroke-dasharray':'3 3'}, ax);
+  el('text', {x:X(8848), y:yAx, 'text-anchor':'middle', class:'lbl', style:'font-weight:700'}, ax, '8’848 m');
+  el('text', {x:24, y:yAx, class:'lbl', style:'fill:var(--muted);font-weight:500'}, ax, 'Lift · laps · hours');
+  // --- lanes
+  RACE.lanes = models.map((m, i) => {
+    const y = H0 + AX + i * rowH, yb = y + rowH - 6, ph = 17, isSel = m.d.x.name === sel;
+    const g = el('g', {class:'lane'}, s);
+    el('rect', {class:'lbg', x:12, y:y + 1, width:W - 24, height:rowH - 2, rx:6, fill:isSel ? 'var(--sign)' : 'var(--grid)', 'fill-opacity':isSel ? .25 : (i % 2 ? .0 : .35)}, g);
+    el('text', {x:24, y:y + 13, class:'lbl', style:'font-size:11.5px' + (isSel ? ';font-weight:700' : '')}, g, clean(m.d.x.name).slice(0, 30));
+    el('text', {x:24, y:y + 25, style:'font-size:9.5px'}, g, `${m.n} × ${sw(m.rise)} m · ${m.d.v.first}–${m.d.v.last}`);
+    let d = `M${X(0)} ${yb}`;
+    for (let k = 0; k < m.n; k++) { const top2 = Math.min((k + 1) * m.rise, 8848), h = ph * (top2 - k * m.rise) / m.rise; d += `L${X(top2)} ${yb - h}L${X(top2)} ${yb}`; }
+    d += 'Z';
+    el('path', {d, fill:'var(--grid)', stroke:'var(--line)', 'stroke-width':.8, 'stroke-linejoin':'round'}, g);
+    const cp = el('clipPath', {id:'rc' + i}, defs), cr = el('rect', {x:X(0) - 1, y:y, width:0, height:rowH}, cp);
+    const prog = el('path', {d, fill:'var(--s1)', 'fill-opacity':.6, stroke:'var(--s1)', 'stroke-width':1.1, 'stroke-linejoin':'round', 'clip-path':`url(#rc${i})`}, g);
+    // summit flag
+    const fl = el('g', {transform:`translate(${X(8848)} ${yb})`, opacity:.25}, g);
+    el('line', {x1:0, y1:0, x2:0, y2:-22, stroke:'var(--ink)', 'stroke-width':1.2}, fl);
+    el('rect', {x:0, y:-22, width:11, height:9, rx:1, fill:'var(--red)'}, fl); el('path', {d:'M5.5 -20.4v5.8M2.6 -17.5h5.8', stroke:'#fff', 'stroke-width':1.8}, fl);
+    // hiker and cabin
+    const hk = el('g', {stroke:'var(--ink)', 'stroke-width':1.3, 'stroke-linecap':'round', fill:'none'}, g);
+    el('circle', {cx:0, cy:-9.5, r:2, fill:'var(--ink)', stroke:'none'}, hk);
+    el('path', {d:'M0 -7.5L-.8 -2.5M-.8 -2.5L-3 1.5M-.8 -2.5L1.6 1.1M-.3 -6.1L2.6 -4.1M2.6 -4.1L3.6 2'}, hk);
+    el('rect', {x:-3.6, y:-7.3, width:2.6, height:3.6, rx:.8, fill:'var(--sign)', stroke:'none'}, hk);
+    const cb = el('g', {}, g); el('line', {x1:0, y1:-4, x2:0, y2:0, stroke:'var(--muted)', 'stroke-width':1}, cb);
+    el('rect', {x:-4.5, y:0, width:9, height:7.5, rx:2, fill:'var(--red)'}, cb); el('rect', {x:-3, y:1.5, width:6, height:2.6, rx:.8, fill:'#fff', 'fill-opacity':.9}, cb);
+    const alt = el('text', {x:X1 + 30, y:y + 13, class:'lbl', style:'font-variant-numeric:tabular-nums'}, g, '0 m');
+    const stx = el('text', {x:X1 + 30, y:y + 25, style:'font-size:9.5px'}, g, '');
+    g.onclick = () => select(m.d.x.name);
+    g.onmousemove = ev => showTip(ev, `<b>${clean(m.d.x.name)}</b><br>${m.n} laps of ${m.rise} m, ${Math.round(m.up * 60)} min each<br>Lift ${m.d.v.first}–${m.d.v.last}<br>${m.done ? 'Summit at ' + hm(m.fin) + ', in time for a ride down' : 'Stuck at ' + sw(m.final) + ' m when the lift closes'}`);
+    g.onmouseleave = hideTip;
+    return {m, yb, ph, cr, prog, fl, hk, cb, alt, stx, X};
+  });
+  Object.assign(RACE, {st1, st2, stars, sun, moon, back, front, snowG, cab, cA, cB, clk, cDone, cOn, cShut, W, H0});
+  raceAt(RACE.T);
+}
+function raceAt(t){
+  const R = RACE; if (!R.clk) return; R.T = t = Math.min(24, Math.max(R.t0, t));
+  const [top, bot, mb, mf, snow, so] = skyAt(t);
+  R.st1.setAttribute('stop-color', top); R.st2.setAttribute('stop-color', bot); R.back.setAttribute('fill', mb); R.front.setAttribute('fill', mf);
+  R.snowG.setAttribute('fill', snow); R.stars.setAttribute('opacity', so);
+  const sr = 5.55, ss = 21.45, fx = (t - sr) / (ss - sr);
+  if (fx > 0 && fx < 1) { R.sun.setAttribute('transform', `translate(${230 + fx * 900} ${172 - Math.sin(Math.PI * fx) * 92})`); R.sun.setAttribute('opacity', 1); } else R.sun.setAttribute('opacity', 0);
+  const nf = t >= ss ? (t - ss) / (24 + sr - ss) : t <= sr ? (t + 24 - ss) / (24 + sr - ss) : -1;
+  if (nf >= 0) { R.moon.setAttribute('transform', `translate(${260 + nf * 860} ${140 - Math.sin(Math.PI * nf) * 72})`); R.moon.setAttribute('opacity', 1); R.moon.querySelector('.moonbite').setAttribute('fill', top); } else R.moon.setAttribute('opacity', 0);
+  const anyOpen = R.lanes.some(l => t >= l.m.F && t <= l.m.Lt), ph = anyOpen ? (Math.sin(t * Math.PI * 4) + 1) / 2 : 0;
+  R.cab.setAttribute('transform', `translate(${R.cA[0] + (R.cB[0] - R.cA[0]) * ph} ${R.cA[1] + (R.cB[1] - R.cA[1]) * ph})`);
+  R.clk.textContent = hm(t); const rc = $('#rClock'); if (rc) rc.textContent = hm(t); const sc = $('#rScrub'); if (sc && document.activeElement !== sc) sc.value = t;
+  let nd = 0, no = 0, ns = 0;
+  for (const L2 of R.lanes) { const {m, yb, ph: P, X: Xf} = L2, e = laneAt(m, m.done ? t : Math.min(t, m.Lt)), closed = !m.done && t > m.Lt;
+    L2.cr.setAttribute('width', Math.max(0, Xf(e.alt) - Xf(0) + 1));
+    L2.prog.setAttribute('fill', closed ? 'var(--cable)' : 'var(--s1)'); L2.prog.setAttribute('stroke', closed ? 'var(--cable)' : 'var(--s1)');
+    const lapTop = Math.min((e.k + 1) * m.rise, 8848), lapH = P * (lapTop - e.k * m.rise) / m.rise;
+    let hx = Xf(e.alt), hy = yb, showCab = false, cy = 0;
+    if (e.mode === 'up') hy = yb - P * (e.alt - e.k * m.rise) / m.rise;
+    else if (e.mode === 'down') { showCab = true; const waitF = m.d.x.wait / (m.d.x.ride + m.d.x.wait + 2), f2 = Math.max(0, (e.frac - waitF) / (1 - waitF)); cy = yb - lapH + lapH * Math.min(1, f2) - 7; hx = Xf(lapTop); }
+    else if (e.mode === 'stuck' || e.mode === 'done') { hx = Xf(lapTop); hy = yb - lapH; }
+    L2.hk.setAttribute('transform', `translate(${hx} ${hy})`); L2.hk.setAttribute('opacity', showCab ? 0 : e.mode === 'pre' ? .45 : closed ? .45 : 1);
+    L2.cb.setAttribute('transform', `translate(${hx} ${cy})`); L2.cb.setAttribute('opacity', showCab ? 1 : 0);
+    L2.fl.setAttribute('opacity', e.mode === 'done' ? 1 : .22);
+    L2.alt.textContent = sw(Math.min(e.alt, 8848)) + ' m';
+    if (e.mode === 'done') { L2.stx.textContent = 'summit ' + hm(m.fin); L2.stx.setAttribute('style', 'font-size:9.5px;fill:var(--good);font-weight:600'); nd++; }
+    else if (closed) { L2.stx.textContent = 'lift closed ' + m.d.v.last; L2.stx.setAttribute('style', 'font-size:9.5px;fill:var(--crit);font-weight:600'); ns++; }
+    else { L2.stx.textContent = t < m.S ? 'starts ' + hm(m.S) : 'lap ' + Math.min(e.k + 1, m.n) + ' of ' + m.n; L2.stx.setAttribute('style', 'font-size:9.5px'); if (t >= m.S) no++; } }
+  R.cDone.textContent = nd; R.cOn.textContent = no; R.cShut.textContent = ns;
+}
+function racePlay(on){ const R = RACE, b = $('#rPlay'); R.playing = on; cancelAnimationFrame(R.raf);
+  if (on) { if (R.T >= 24) R.T = R.t0; R.last = performance.now();
+    const step = now => { const dt = (now - R.last) / 1000; R.last = now; raceAt(R.T + dt * (24 - R.t0) / R.DUR); if (R.T >= 24) { racePlay(false); return; } R.raf = requestAnimationFrame(step); };
+    R.raf = requestAnimationFrame(step); }
+  if (b) b.textContent = on ? '❚❚ Pause' : R.T >= 24 ? '↺ Replay' : '▶ Play'; }
+
+function riseChart(svgId, pts, xmax, xstep, xfmt, xtitle){ // pts: [{x, c, v, px, isGA}]
+  const s = $(svgId); s.innerHTML = '';
+  const W = 640, Ht = 420, m = {l:56, r:24, t:24, b:40}, ymax = 1400;
+  const sx = v => m.l + Math.min(v, xmax) / xmax * (W - m.l - m.r), sy = v => Ht - m.b - Math.min(v, ymax) / ymax * (Ht - m.t - m.b);
+  const g = el('g', {}, s);
+  for (let v = 0; v <= xmax; v += xstep) { el('line', {x1:sx(v), x2:sx(v), y1:m.t, y2:Ht - m.b, stroke:'var(--grid)'}, g); el('text', {x:sx(v), y:Ht - m.b + 16, 'text-anchor':'middle'}, g, xfmt(v)); }
+  for (let v = 0; v <= ymax; v += 200) { el('line', {x1:m.l, x2:W - m.r, y1:sy(v), y2:sy(v), stroke:'var(--grid)'}, g); el('text', {x:m.l - 6, y:sy(v) + 3.5, 'text-anchor':'end'}, g, sw(v) + ' m'); }
+  el('text', {x:W - m.r, y:Ht - 6, 'text-anchor':'end'}, g, xtitle + ' →'); el('text', {x:m.l, y:m.t - 8}, g, '↑ height per lap');
+  // frontier: sorted by x, keep each new record rise
+  const front = []; let best = -1;
+  [...pts].sort((a, b) => a.px - b.px || b.x.rise - a.x.rise).forEach(p => { if (p.x.rise > best) { best = p.x.rise; front.push(p); } });
+  let d = ''; front.forEach((p, i) => { const X = sx(p.px), Y = sy(p.x.rise); d += i ? `H${X}V${Y}` : `M${X} ${Y}`; });
+  if (front.length) d += `H${W - m.r}`;
+  el('path', {d, fill:'none', stroke:'var(--ink)', 'stroke-width':1.4, 'stroke-dasharray':'5 4', 'stroke-opacity':.7}, g);
+  const fset = new Set(front);
+  pts.sort((a, b) => fset.has(a) - fset.has(b) || (a.x.name === sel) - (b.x.name === sel)).forEach(p => {
+    const cx = sx(p.px), cy = sy(p.x.rise), isSel = p.x.name === sel, onF = fset.has(p);
+    if (p.isGA) el('circle', {cx, cy, r:9, fill:'none', stroke:'var(--good)', 'stroke-width':2}, g);
+    const mk = mark(g, status(p.c.lift), cx, cy, onF || isSel ? 5 : 3); if (!onF && !isSel) mk.setAttribute('fill-opacity', .45);
+    if (isSel) pin(g, cx, cy);
+    const hit = el('circle', {cx, cy, r:8, fill:'transparent', style:'cursor:pointer'}, g);
+    hit.onmousemove = ev => showTip(ev, tipHtml(p.x, p.c)); hit.onmouseleave = hideTip; hit.onclick = () => select(p.x.name);
+  });
+  const placed = [];
+  front.forEach(p => { const cx = sx(p.px), cy = sy(p.x.rise); if (placed.some(([a, b]) => Math.abs(a - cx) < 90 && Math.abs(b - cy) < 13)) return; placed.push([cx, cy]);
+    const right = cx < W - 170; el('text', {x:right ? cx + 9 : cx - 9, y:cy - 7, 'text-anchor':right ? 'start' : 'end', class:'lbl', style:'font-size:10.5px'}, g, clean(p.x.name).slice(0, 24)); });
+}
+function drawRise(calcs, top){
+  riseChart('#risetr', L.map((x, i) => ({x, c: calcs[i], px: x.travel})).filter(p => p.px != null), 240, 60, v => v / 60 + ' h', 'travel from Zürich HB');
+  const tp = top.filter(d => !d.v.nosummer && (d.v.cost != null || d.v.ga === 'full')).map(d => ({x: d.x, c: d.c, px: d.v.cost ?? 0, isGA: d.v.ga === 'full'}));
+  riseChart('#risepr', tp, 300, 50, v => 'CHF ' + v, 'CHF per attempt (Halbtax)');
+}
 function render(){
   $('#vam').value = V; $('#hs').value = H;
   $('#vamO').textContent = V + ' m/h'; $('#hsO').textContent = H + ' km/h';
@@ -591,7 +816,7 @@ function render(){
   top.sort((a, b) => (a.gap ?? 99) - (b.gap ?? 99));
   const nv = top.filter(d => d.win != null).length;
   $('#tcap').textContent = `Summer timetables (2026, the best guide to summer 2027) from operator sites, checked for ${nv} of ${top.length} lifts. Your lift time starts at the first ride and grows with your pace. Anything in red runs past closing.`;
-  drawGantt(top); drawMinPace(top); drawSeason(top); drawCostTravel(top);
+  drawGantt(top); drawMinPace(top); drawSeason(top); drawCostTravel(top); drawRace(top); drawRise(calcs, top);
 }
 function drawScene(){
   const s = $('#scene'); if (!s) return; s.innerHTML = '';
@@ -670,4 +895,12 @@ function drawScene(){
 }
 drawScene();
 render();
+
+$('#rPlay').onclick = () => racePlay(!RACE.playing);
+$('#rScrub').oninput = e => { racePlay(false); raceAt(+e.target.value); };
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (location.search.includes('race-export')) { document.documentElement.dataset.theme = 'dark'; document.body.classList.add('export'); const qt = +new URLSearchParams(location.search).get('t'); raceAt(qt || RACE.t0); }
+else if (reduceMotion || !('IntersectionObserver' in window)) { raceAt(24); racePlay(false); }
+else { new IntersectionObserver((es, ob) => { if (es.some(e => e.isIntersecting) && !RACE.seen) { RACE.seen = true; racePlay(true); ob.disconnect(); } }, {threshold:.3}).observe($('#race')); }
+
 </script>

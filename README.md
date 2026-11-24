@@ -2,6 +2,8 @@
 
 **Live dashboard: https://michelkluger.github.io/swiss-everesting-atlas/**
 
+[▶ Race day video](race-day.mp4): every checked lift racing to 8’848 m over one June day. It was rendered from the dashboard with `?race-export`.
+
 Where in Switzerland can you do an *hiking Everesting*: climb 8,848 m on foot, ride the lift down after each lap?
 
 The dashboard ranks 1,461 Swiss cable cars, gondolas, chairlifts and funiculars. For most of them, what limits you is the lift's operating hours, not your legs.
